@@ -4,3 +4,15 @@ out
 *.tsbuildinfo
 .DS_Store
 .vercel
+
+# Local handover archives and working notes – never commit
+/Claude outputs/
+*.zip
+/docs/from-prompt-to-product/
+
+# Superseded first-round From Prompt to Product files – never publish or commit.
+/public/work/from-prompt-to-product/figma/
+/public/work/from-prompt-to-product/code/
+/public/work/from-prompt-to-product/prototype/
+
+# design-source/ (original PNG exports) IS tracked: it sits outside public/, so it is never part of the website.

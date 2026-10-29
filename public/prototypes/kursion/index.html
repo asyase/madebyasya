@@ -1,0 +1,1050 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trainings – Kursion (prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== Tokens (same values as the Figma Variables: primitive → semantic → component) ===== */
+:root {
+  --color-neutral-0:#FFFFFF; --color-neutral-50:#F6F5F2; --color-neutral-100:#EEECE8; --color-neutral-200:#DEDBD5;
+  --color-neutral-400:#8A857D; --color-neutral-600:#5C5852; --color-neutral-900:#1F1D1A;
+  --color-blue-50:#EEF2FF; --color-blue-600:#2245B8; --color-blue-700:#1A3794;
+  --color-red-50:#FBEFEC; --color-red-600:#A3271F; --color-red-700:#82201A;
+  --color-green-50:#EAF4EE; --color-green-700:#25613D; --color-purple-50:#F1EDF8; --color-purple-700:#644291;
+  --color-amber-50:#FDF5E6; --color-amber-300:#E3C27A; --color-amber-800:#7A4E00;
+  --color-blue-200:#B9C8FF; --color-neutral-300:#D9D6D0;
+
+  --bg-canvas:var(--color-neutral-50); --bg-surface:var(--color-neutral-0); --bg-subtle:var(--color-neutral-50); --bg-muted:var(--color-neutral-100);
+  --border-default:var(--color-neutral-200); --border-input:var(--color-neutral-400); --border-focus:var(--color-blue-600);
+  --text-primary:var(--color-neutral-900); --text-secondary:var(--color-neutral-600); --text-disabled:var(--color-neutral-400); --text-on-action:var(--color-neutral-0);
+  --action-primary:var(--color-blue-600); --action-primary-hover:var(--color-blue-700); --action-primary-subtle:var(--color-blue-50);
+  --action-destructive:var(--color-red-600); --action-destructive-hover:var(--color-red-700); --action-destructive-subtle:var(--color-red-50);
+  --warning-bg:var(--color-amber-50); --warning-border:var(--color-amber-300); --warning-fg:var(--color-amber-800); --danger-fg:var(--color-red-600);
+  --status-draft-bg:var(--color-neutral-100); --status-draft-fg:var(--color-neutral-600);
+  --status-published-bg:var(--color-blue-50); --status-published-fg:var(--color-blue-600);
+  --status-open-bg:var(--color-green-50); --status-open-fg:var(--color-green-700);
+  --status-completed-bg:var(--color-purple-50); --status-completed-fg:var(--color-purple-700);
+  --status-cancelled-bg:var(--color-red-50); --status-cancelled-fg:var(--color-red-600);
+  /* Inverse surface (notifications) */
+  --inverse-bg:var(--color-neutral-900); --inverse-text:var(--color-neutral-0); --inverse-link:var(--color-blue-200); --inverse-icon:var(--color-neutral-300);
+  --inverse-hover:color-mix(in srgb, var(--color-neutral-0) 12%, transparent); --inverse-focus:var(--color-blue-200);
+  /* Overlay and elevation (derived from neutral/900, no fixed colour values) */
+  --overlay-scrim:color-mix(in srgb, var(--color-neutral-900) 40%, transparent);
+  --shadow-modal:0 16px 40px color-mix(in srgb, var(--color-neutral-900) 16%, transparent);
+  --shadow-drawer:-16px 0 40px color-mix(in srgb, var(--color-neutral-900) 12%, transparent);
+  --shadow-toast:0 12px 32px color-mix(in srgb, var(--color-neutral-900) 24%, transparent);
+
+  --space-xs:4px; --space-sm:8px; --space-md:12px; --space-lg:16px; --space-xl:24px; --space-2xl:32px;
+  --radius-control:8px; --radius-card:12px;
+  --font-body:'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+* { box-sizing:border-box; }
+html { -webkit-text-size-adjust:100%; }
+body { margin:0; background:var(--bg-canvas); color:var(--text-primary); font-family:var(--font-body); font-size:14px; line-height:20px; }
+button, input, select, textarea { font:inherit; color:inherit; }
+button { cursor:pointer; }
+svg.i { width:20px; height:20px; flex:none; fill:none; stroke:currentColor; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; }
+.sr-only { position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+:focus-visible { outline:2px solid var(--border-focus); outline-offset:2px; }
+.skip-link { position:absolute; left:16px; top:-60px; z-index:100; background:var(--bg-surface); padding:8px 12px; border-radius:var(--radius-control); border:1px solid var(--border-input); font-weight:600; color:var(--action-primary); }
+.skip-link:focus { top:12px; }
+
+/* ===== Layout ===== */
+.app { display:flex; min-height:100vh; }
+.sidenav { width:224px; flex:none; background:var(--bg-surface); border-right:1px solid var(--border-default); padding:24px 16px; display:flex; flex-direction:column; justify-content:space-between; position:sticky; top:0; height:100vh; }
+.brand { display:flex; align-items:center; gap:12px; padding:0 0 0 4px; font-size:16px; font-weight:700; color:var(--text-primary); text-decoration:none; }
+.brand-mark { width:32px; height:32px; border-radius:8px; background:var(--action-primary); color:var(--text-on-action); display:grid; place-items:center; }
+.brand-mark svg.i { width:18px; height:18px; }
+.nav-label { font-size:11px; line-height:16px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--text-secondary); margin:32px 0 8px 4px; }
+.nav-list { list-style:none; margin:0; padding:0; display:grid; gap:4px; }
+.nav-link { display:flex; align-items:center; gap:12px; height:40px; padding:0 12px; border-radius:var(--radius-control); color:var(--text-primary); text-decoration:none; font-weight:500; }
+.nav-link svg.i { color:var(--text-secondary); width:18px; height:18px; }
+.nav-link:hover { background:var(--bg-subtle); }
+.nav-link[aria-current="page"] { background:var(--action-primary-subtle); color:var(--action-primary); font-weight:600; }
+.nav-link[aria-current="page"] svg.i { color:var(--action-primary); }
+.account { display:grid; gap:16px; }
+.profile { display:flex; gap:12px; align-items:center; padding:12px 4px 0; border-top:1px solid var(--border-default); }
+.avatar { width:36px; height:36px; border-radius:8px; background:var(--bg-muted); display:grid; place-items:center; font-size:13px; font-weight:600; flex:none; }
+.profile-name { font-size:13px; font-weight:600; line-height:16px; } .profile-role { font-size:12px; color:var(--text-secondary); line-height:16px; }
+.workspace { flex:1; min-width:0; display:flex; flex-direction:column; }
+.topbar { display:none; }
+.page-header { padding:24px 32px; border-bottom:1px solid var(--border-default); display:grid; gap:24px; }
+.context { display:flex; justify-content:space-between; gap:16px; font-size:13px; line-height:16px; color:var(--text-secondary); }
+.title-row { display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
+h1 { font-size:24px; line-height:32px; font-weight:700; margin:0; }
+.subtitle { margin:2px 0 0; color:var(--text-secondary); }
+main { padding:24px 32px 40px; display:grid; gap:24px; }
+
+/* ===== Buttons ===== */
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; height:40px; padding:0 16px; border-radius:var(--radius-control); border:1px solid transparent; font-weight:600; font-size:14px; white-space:nowrap; text-decoration:none; }
+.btn svg.i { width:16px; height:16px; }
+.btn-primary { background:var(--action-primary); color:var(--text-on-action); }
+.btn-primary:hover { background:var(--action-primary-hover); }
+.btn-secondary { background:var(--bg-surface); color:var(--text-primary); border-color:var(--border-input); }
+.btn-secondary:hover { background:var(--bg-subtle); }
+.btn-destructive { background:var(--action-destructive); color:var(--text-on-action); }
+.btn-destructive:hover { background:var(--action-destructive-hover); }
+.btn-ghost { height:32px; padding:0 8px; background:transparent; color:var(--action-primary); }
+.btn-ghost:hover { background:var(--action-primary-subtle); text-decoration:underline; }
+.btn-ghost.danger { color:var(--action-destructive); }
+.btn-ghost.danger:hover { background:var(--action-destructive-subtle); }
+.btn-icon { width:40px; padding:0; color:var(--text-secondary); background:transparent; }
+.btn-icon:hover { background:var(--bg-subtle); color:var(--text-primary); }
+.btn-link { background:none; border:0; padding:0 2px; height:auto; color:var(--action-primary); font-weight:600; text-decoration:underline; text-underline-offset:2px; border-radius:4px; }
+
+/* ===== Search + sort ===== */
+.controls { display:flex; gap:16px; align-items:flex-start; }
+.field { display:grid; gap:8px; }
+.field > label, .field-label, legend { font-size:13px; line-height:16px; font-weight:600; color:var(--text-primary); }
+.search-field { flex:1; min-width:0; }
+.input-wrap { position:relative; display:flex; align-items:center; }
+.input-wrap > svg.i { position:absolute; left:12px; width:18px; height:18px; color:var(--text-secondary); pointer-events:none; }
+.input, .select { width:100%; height:44px; border:1px solid var(--border-input); border-radius:var(--radius-control); background:var(--bg-surface); padding:0 12px; font-size:14px; }
+.input::placeholder, textarea::placeholder { color:var(--text-secondary); }
+.input-wrap .input { padding-left:38px; padding-right:44px; }
+.input:focus-visible, .select:focus-visible, textarea:focus-visible { outline:2px solid var(--border-focus); outline-offset:2px; border-color:var(--border-focus); }
+.clear-search { position:absolute; right:2px; width:40px; height:40px; border:0; background:transparent; border-radius:6px; display:grid; place-items:center; color:var(--text-secondary); }
+.clear-search[hidden] { display:none; }
+.clear-search:hover { color:var(--text-primary); background:var(--bg-subtle); }
+.clear-search svg.i { width:18px; height:18px; }
+.sort-field { width:248px; flex:none; }
+.select { appearance:none; -webkit-appearance:none; padding-right:36px; }
+.select-wrap { position:relative; display:block; }
+.select-wrap::after { content:""; position:absolute; right:12px; top:50%; width:16px; height:16px; margin-top:-8px; pointer-events:none; background:var(--text-primary); -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center/16px no-repeat; mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center/16px no-repeat; }
+.hint { font-size:13px; line-height:16px; color:var(--text-secondary); margin:0; }
+
+/* ===== Filter chips ===== */
+.chips { display:flex; flex-wrap:wrap; gap:8px; margin:0; padding:0; list-style:none; }
+.chip { display:inline-flex; align-items:center; gap:8px; height:36px; padding:0 12px; border-radius:var(--radius-control); border:1px solid var(--border-default); background:var(--bg-surface); font-size:13px; font-weight:500; color:var(--text-secondary); }
+.chip:hover { background:var(--bg-subtle); border-color:var(--border-input); }
+.chip .count { font-weight:600; }
+.chip svg.i { width:16px; height:16px; display:none; }
+.chip[aria-pressed="true"] { background:var(--action-primary-subtle); border-color:var(--action-primary); color:var(--action-primary); font-weight:700; }
+.chip[aria-pressed="true"] svg.i.check { display:block; }
+.chip.attention svg.i.warn { display:block; color:var(--warning-fg); }
+.chip.attention[aria-pressed="true"] svg.i.warn { display:none; }
+
+/* ===== Warning card ===== */
+.alert { display:flex; align-items:center; gap:12px; padding:16px; border-radius:var(--radius-card); border:1px solid var(--warning-border); background:var(--warning-bg); }
+.alert > svg.i { color:var(--warning-fg); align-self:flex-start; margin-top:1px; }
+.alert-body { flex:1; min-width:0; }
+.alert-title { font-weight:700; margin:0; font-size:14px; line-height:20px; }
+.alert-text { margin:2px 0 0; font-size:13px; line-height:18px; color:var(--text-secondary); }
+.alert.is-active { border-color:var(--warning-fg); box-shadow:inset 4px 0 0 var(--warning-fg); }
+.rule { margin-top:6px; font-size:13px; line-height:18px; }
+.rule summary { display:inline-flex; align-items:center; gap:4px; cursor:pointer; color:var(--action-primary); font-weight:600; border-radius:4px; list-style:none; min-height:24px; }
+.rule summary::-webkit-details-marker { display:none; }
+.rule summary svg.i { width:14px; height:14px; stroke-width:2.4; transition:transform .15s; }
+.rule[open] summary svg.i { transform:rotate(90deg); }
+.rule summary:hover { text-decoration:underline; }
+.rule p { margin:6px 0 0; color:var(--text-primary); max-width:720px; }
+.alert-flag { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:700; color:var(--warning-fg); text-transform:uppercase; letter-spacing:.04em; margin-bottom:2px; }
+
+/* ===== Results ===== */
+.results { display:grid; gap:16px; }
+.summary { display:flex; justify-content:space-between; align-items:baseline; gap:8px 16px; flex-wrap:wrap; }
+.summary-left { display:flex; gap:8px 12px; align-items:baseline; flex-wrap:wrap; }
+.result-count { font-weight:700; margin:0; font-size:14px; }
+.summary-note { font-size:13px; color:var(--text-secondary); }
+.card { background:var(--bg-surface); border:1px solid var(--border-default); border-radius:var(--radius-card); overflow:hidden; }
+table { width:100%; border-collapse:collapse; table-layout:fixed; }
+thead th { background:var(--bg-subtle); height:44px; padding:0 16px; text-align:left; font-size:13px; font-weight:600; color:var(--text-secondary); border-bottom:1px solid var(--border-default); }
+th[aria-sort="ascending"], th[aria-sort="descending"] { color:var(--text-primary); }
+.sort-btn { display:inline-flex; align-items:center; gap:4px; border:0; background:none; padding:4px 6px; margin-left:-6px; font-size:13px; font-weight:inherit; color:inherit; border-radius:6px; }
+.sort-btn:hover { background:var(--bg-muted); color:var(--text-primary); }
+th[aria-sort="ascending"] .sort-btn, th[aria-sort="descending"] .sort-btn { font-weight:700; }
+.sort-btn svg.i { width:14px; height:14px; }
+tbody td { padding:12px 16px; border-bottom:1px solid var(--border-default); vertical-align:middle; height:68px; font-size:13px; }
+tbody tr:last-child td { border-bottom:0; }
+tbody tr:hover td { background:var(--bg-subtle); }
+tbody tr.attention td { background:var(--warning-bg); }
+tbody tr.attention td:first-child { box-shadow:inset 4px 0 0 var(--warning-fg); }
+tbody tr.flash td { animation:flash 2.4s ease-out; }
+@keyframes flash { 0%,40% { background:var(--action-primary-subtle); } 100% { background:transparent; } }
+.t-name { font-size:14px; font-weight:600; color:var(--text-primary); overflow-wrap:anywhere; }
+.t-sub { color:var(--text-secondary); font-size:13px; line-height:18px; }
+.t-date { font-weight:500; }
+.seats { display:flex; align-items:center; gap:4px; font-weight:700; font-size:14px; }
+.seats svg.i { width:14px; height:14px; color:var(--warning-fg); }
+.below-min { color:var(--warning-fg); font-weight:600; font-size:13px; line-height:18px; white-space:nowrap; }
+.actions { display:flex; gap:4px; align-items:center; flex-wrap:wrap; }
+td .actions { flex-wrap:nowrap; }
+.readonly { display:inline-flex; align-items:center; gap:4px; color:var(--text-secondary); font-weight:500; font-size:13px; padding-left:8px; }
+.readonly svg.i { width:14px; height:14px; }
+.table-footer { display:flex; justify-content:space-between; align-items:center; gap:8px 16px; flex-wrap:wrap; padding:16px; border-top:1px solid var(--border-default); font-size:13px; color:var(--text-secondary); min-height:56px; }
+.table-footer span { display:inline-flex; gap:8px; align-items:center; }
+.table-footer svg.i { width:14px; height:14px; }
+
+/* Status badges: label + icon, never colour alone */
+.badge { display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:var(--radius-control); font-size:13px; font-weight:600; line-height:20px; white-space:nowrap; }
+.badge svg.i { width:13px; height:13px; stroke-width:2.2; }
+.badge.draft { background:var(--status-draft-bg); color:var(--status-draft-fg); }
+.badge.published { background:var(--status-published-bg); color:var(--status-published-fg); }
+.badge.open { background:var(--status-open-bg); color:var(--status-open-fg); }
+.badge.completed { background:var(--status-completed-bg); color:var(--status-completed-fg); }
+.badge.cancelled { background:var(--status-cancelled-bg); color:var(--status-cancelled-fg); }
+
+/* Mobile/tablet card list */
+.tlist { list-style:none; margin:0; padding:0; display:none; gap:12px; }
+.tcard { background:var(--bg-surface); border:1px solid var(--border-default); border-radius:var(--radius-card); padding:16px; display:grid; gap:8px; align-content:start; }
+.tcard.attention { border-color:var(--warning-border); box-shadow:inset 4px 0 0 var(--warning-fg); background:linear-gradient(var(--warning-bg),var(--warning-bg)); }
+.tcard-head { display:flex; justify-content:space-between; gap:8px; align-items:flex-start; }
+.tcard h3 { font-size:14px; line-height:20px; margin:0; overflow-wrap:anywhere; }
+.tcard .actions { gap:8px; }
+.tcard .actions .btn-ghost { height:44px; min-width:44px; padding:0 10px; }
+.list-footer { font-size:13px; color:var(--text-secondary); padding:4px 0; display:none; }
+
+/* Empty state */
+.empty { text-align:center; padding:48px 24px; display:grid; justify-items:center; gap:16px; }
+.empty-icon { width:56px; height:56px; border-radius:50%; background:var(--bg-muted); display:grid; place-items:center; color:var(--text-secondary); }
+.empty h2 { font-size:14px; line-height:20px; margin:0; }
+.empty p { margin:4px 0 0; font-size:13px; color:var(--text-secondary); max-width:420px; }
+.empty .row { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+
+/* ===== Dialogs ===== */
+dialog { border:0; padding:0; color:var(--text-primary); background:var(--bg-surface); }
+dialog::backdrop { background:var(--overlay-scrim); }
+.modal { width:min(560px, calc(100vw - 32px)); max-height:calc(100vh - 32px); border-radius:var(--radius-card); border:1px solid var(--border-default); box-shadow:var(--shadow-modal); overflow:hidden; }
+.modal[open] { display:flex; flex-direction:column; }
+.modal.wide { width:min(680px, calc(100vw - 32px)); }
+.modal-head { display:flex; align-items:center; gap:12px; padding:24px 24px 0 32px; }
+.modal-head h2 { font-size:20px; line-height:28px; margin:0; flex:1; overflow-wrap:anywhere; }
+.modal-body { padding:24px 32px; overflow:auto; display:grid; gap:24px; align-content:start; }
+.modal-foot { display:flex; justify-content:flex-end; gap:12px; padding:20px 32px; border-top:1px solid var(--border-default); flex-wrap:wrap; }
+.danger-mark { width:40px; height:40px; border-radius:8px; background:var(--action-destructive-subtle); color:var(--action-destructive); display:grid; place-items:center; flex:none; }
+.summary-box { background:var(--bg-subtle); border:1px solid var(--border-default); border-radius:var(--radius-control); padding:16px; display:grid; gap:12px; }
+.summary-box .row { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+.consequences { margin:0; padding-left:20px; display:grid; gap:8px; color:var(--text-secondary); }
+.strong-note { font-weight:600; margin:0; }
+
+.drawer { margin:0 0 0 auto; width:min(480px, 100vw); height:100%; max-height:100%; border-left:1px solid var(--border-default); box-shadow:var(--shadow-drawer); }
+.drawer[open] { display:flex; flex-direction:column; }
+.drawer .modal-head { padding:24px 24px 0 24px; align-items:flex-start; }
+.drawer .modal-body { padding:24px; flex:1; }
+.drawer .modal-foot { padding:16px 24px; justify-content:flex-start; }
+.d-id { font-size:13px; color:var(--text-secondary); margin:0 0 4px; }
+.dl { display:grid; grid-template-columns:auto 1fr; gap:12px 16px; margin:0; }
+.dl dt { color:var(--text-secondary); font-size:13px; display:flex; gap:8px; align-items:center; }
+.dl dt svg.i { width:16px; height:16px; }
+.dl dd { margin:0; font-weight:500; overflow-wrap:anywhere; }
+.meter { height:8px; border-radius:4px; background:var(--bg-muted); overflow:hidden; margin-top:8px; }
+.meter > span { display:block; height:100%; background:var(--action-primary); }
+.meter.low > span { background:var(--warning-fg); }
+.inline-alert { display:flex; gap:12px; padding:12px 16px; border-radius:var(--radius-control); background:var(--warning-bg); border:1px solid var(--warning-border); font-size:13px; }
+.inline-alert svg.i { color:var(--warning-fg); width:18px; height:18px; margin-top:1px; }
+.inline-alert.neutral { background:var(--bg-subtle); border-color:var(--border-default); }
+.inline-alert.neutral svg.i { color:var(--text-secondary); }
+.nav-drawer { margin:0 auto 0 0; width:min(280px, 85vw); height:100%; max-height:100%; padding:24px 16px; }
+.nav-drawer[open] { display:flex; flex-direction:column; }
+
+/* Form */
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px 16px; }
+.form-grid .full { grid-column:1 / -1; }
+fieldset { border:0; margin:0; padding:0; min-width:0; }
+legend { padding:0; margin-bottom:8px; }
+.req { color:var(--danger-fg); }
+.radios { display:flex; gap:8px; flex-wrap:wrap; }
+.radio { position:relative; }
+.radio input { position:absolute; opacity:0; inset:0; margin:0; cursor:pointer; }
+.radio span { display:inline-flex; align-items:center; gap:6px; height:40px; padding:0 14px; border:1px solid var(--border-input); border-radius:var(--radius-control); background:var(--bg-surface); font-weight:500; }
+.radio span::before { content:""; width:14px; height:14px; border-radius:50%; border:1.5px solid var(--border-input); box-sizing:border-box; }
+.radio input:checked + span { border-color:var(--action-primary); background:var(--action-primary-subtle); color:var(--action-primary); font-weight:600; }
+.radio input:checked + span::before { border:4px solid var(--action-primary); }
+.radio input:focus-visible + span { outline:2px solid var(--border-focus); outline-offset:2px; }
+textarea.input { height:auto; min-height:88px; padding:10px 12px; resize:vertical; }
+.input[aria-invalid="true"], .select[aria-invalid="true"] { border:2px solid var(--danger-fg); }
+fieldset[aria-invalid="true"] .radio span { border-color:var(--danger-fg); }
+.error { display:flex; gap:6px; align-items:flex-start; color:var(--danger-fg); font-size:13px; line-height:18px; margin:0; font-weight:500; }
+.error svg.i { width:14px; height:14px; margin-top:2px; }
+.error[hidden] { display:none; }
+.error-summary { border:2px solid var(--danger-fg); background:var(--action-destructive-subtle); border-radius:var(--radius-control); padding:12px 16px; }
+.error-summary h3 { margin:0 0 4px; font-size:14px; }
+.error-summary ul { margin:0; padding-left:20px; }
+.error-summary li { line-height:24px; } .error-summary a { color:var(--danger-fg); font-weight:600; display:inline-block; min-height:24px; max-width:100%; vertical-align:top; }
+.form-note { margin:0; font-size:13px; color:var(--text-secondary); }
+
+/* Toasts */
+.toasts { position:fixed; right:24px; bottom:24px; z-index:50; display:grid; gap:8px; width:min(420px, calc(100vw - 32px)); }
+.toast { display:flex; gap:12px; align-items:flex-start; padding:14px 12px 14px 16px; background:var(--inverse-bg); color:var(--inverse-text); border-radius:var(--radius-card); box-shadow:var(--shadow-toast); font-size:14px; }
+.toast svg.i { width:18px; height:18px; margin-top:1px; flex:none; }
+.toast .t-msg { flex:1; }
+.toast .t-act { color:var(--inverse-link); background:none; border:0; font-weight:700; text-decoration:underline; padding:0; margin-top:4px; display:inline-block; }
+.toast .btn-icon { width:32px; height:32px; color:var(--inverse-icon); margin:-6px -4px 0 0; }
+.toast .btn-icon:hover { background:var(--inverse-hover); color:var(--inverse-text); }
+.toast :focus-visible { outline-color:var(--inverse-focus); }
+
+/* ===== Responsive ===== */
+@media (max-width: 1023px) {
+  .sidenav { display:none; }
+  .topbar { display:flex; align-items:center; gap:8px; height:56px; padding:0 8px 0 4px; background:var(--bg-surface); border-bottom:1px solid var(--border-default); position:sticky; top:0; z-index:5; }
+  .topbar .brand { flex:1; }
+  .page-header { padding:20px 24px; gap:16px; }
+  main { padding:20px 24px 32px; }
+}
+@media (max-width: 899px) {
+  .table-wrap { display:none; }
+  .tlist { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); }
+  .list-footer { display:block; }
+}
+@media (max-width: 599px) {
+  .context .crumb { display:none; }
+  .page-header { padding:20px 16px 16px; }
+  main { padding:16px 16px 32px; gap:20px; }
+  .title-row .btn-primary { width:100%; height:44px; }
+  .controls { flex-direction:column; align-items:stretch; }
+  .sort-field { width:100%; }
+  .chip { height:40px; }
+  .alert { display:grid; grid-template-columns:20px 1fr; gap:8px; padding:12px; align-items:start; }
+  .alert > svg.i { margin-top:0; }
+  .alert-text { margin-top:0; }
+  .alert .rule { margin-top:2px; }
+  .alert .rule summary { min-height:44px; }
+  .alert .btn { grid-column:1 / -1; width:100%; height:44px; }
+  .tlist { grid-template-columns:1fr; }
+  .summary-note { width:100%; }
+  .form-grid { grid-template-columns:1fr; }
+  .modal-head { padding:20px 16px 0 20px; } .modal-body { padding:20px; } .modal-foot { padding:16px 20px; }
+  .modal-foot .btn { flex:1 1 auto; height:44px; }
+  .modal { width:calc(100vw - 16px); max-height:calc(100vh - 16px); }
+  .drawer .modal-foot .btn { height:44px; }
+  .toasts { right:16px; bottom:16px; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2-10 5 10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></symbol>
+    <symbol id="i-dashboard" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+    <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.48 12.89 17 22l-5-3-5 3 1.52-9.11"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-search-x" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M8.5 8.5l5 5M13.5 8.5l-5 5"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M12 19V5"/></symbol>
+    <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14M19 12l-7 7-7-7"/></symbol>
+    <symbol id="i-sort" viewBox="0 0 24 24"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></symbol>
+    <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24"><path d="M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l8.59-8.59a1 1 0 0 0 0-1.41Z"/><path d="M7 7h.01"/></symbol>
+    <symbol id="i-seat" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-dot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="currentColor"/></symbol>
+    <symbol id="i-circle-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-circle-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+  </defs>
+</svg>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="app" id="app">
+  <aside class="sidenav" aria-label="Primary">
+    <div>
+      <a class="brand" href="#main"><span class="brand-mark"><svg class="i"><use href="#i-layers"/></svg></span>Kursion</a>
+      <nav aria-label="Workspace" class="nav-slot"></nav>
+    </div>
+    <div class="account">
+      <a class="nav-link" href="#help" data-unavailable="Help &amp; resources"><svg class="i"><use href="#i-help"/></svg>Help &amp; resources</a>
+      <div class="profile"><span class="avatar" aria-hidden="true">AM</span><div><div class="profile-name">Alex Morgan</div><div class="profile-role">Training Manager</div></div></div>
+    </div>
+  </aside>
+
+  <div class="workspace">
+    <header class="app-header">
+    <div class="topbar">
+      <button class="btn btn-icon" id="menuBtn" aria-label="Open navigation" aria-haspopup="dialog"><svg class="i"><use href="#i-menu"/></svg></button>
+      <a class="brand" href="#main"><span class="brand-mark"><svg class="i"><use href="#i-layers"/></svg></span>Kursion</a>
+      <span class="avatar" aria-label="Alex Morgan, Training Manager" role="img">AM</span>
+    </div>
+
+    <div class="page-header">
+      <div class="context"><span class="crumb">Acme Learning / Training management</span><span id="today"></span></div>
+      <div class="title-row">
+        <div>
+          <h1 id="pageTitle" tabindex="-1">Trainings</h1>
+          <p class="subtitle">Manage your courses, monitor registrations and keep learning on track.</p>
+        </div>
+        <button class="btn btn-primary" id="newBtn" aria-haspopup="dialog"><svg class="i"><use href="#i-plus"/></svg>New training</button>
+      </div>
+    </div>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <section aria-label="Search, sort and filter" style="display:grid; gap:24px;">
+        <div class="controls">
+          <div class="field search-field">
+            <label for="search">Search trainings</label>
+            <div class="input-wrap" role="search">
+              <svg class="i"><use href="#i-search"/></svg>
+              <input class="input" id="search" type="search" autocomplete="off" placeholder="Search by training name, ID or lecturer" aria-describedby="searchHint">
+              <button class="clear-search" id="clearSearch" type="button" aria-label="Clear search" hidden><svg class="i"><use href="#i-x"/></svg></button>
+            </div>
+            <p class="hint" id="searchHint">Results update as you type. Press Escape to clear.</p>
+          </div>
+          <div class="field sort-field">
+            <label for="sort">Sort by</label>
+            <span class="select-wrap"><select class="select" id="sort">
+              <option value="attention">Needs attention first</option>
+              <option value="name-asc">Name (A–Z)</option>
+              <option value="name-desc">Name (Z–A)</option>
+              <option value="date-asc">Start date (soonest first)</option>
+              <option value="date-desc">Start date (latest first)</option>
+              <option value="lecturer-asc">Lecturer (A–Z)</option>
+              <option value="lecturer-desc">Lecturer (Z–A)</option>
+              <option value="seats-desc">Available seats (most first)</option>
+              <option value="seats-asc">Available seats (fewest first)</option>
+            </select></span>
+          </div>
+        </div>
+        <div role="group" aria-label="Filter by status">
+          <ul class="chips" id="chips"></ul>
+        </div>
+        <div id="alertSlot"></div>
+      </section>
+
+      <section class="results" aria-labelledby="resultCount">
+        <div class="summary">
+          <div class="summary-left">
+            <h2 class="result-count" id="resultCount" tabindex="-1">Trainings</h2>
+            <button class="btn-link" id="resetAll" type="button" hidden>Reset search and filters</button>
+          </div>
+          <span class="summary-note">Seats: registered / total · All times CET</span>
+        </div>
+        <div class="sr-only" aria-live="polite" id="live"></div>
+
+        <div class="card table-wrap">
+          <table>
+            <caption class="sr-only" id="tableCaption">Trainings</caption>
+            <colgroup><col><col style="width:136px"><col style="width:148px"><col style="width:124px"><col style="width:184px"><col style="width:252px"></colgroup>
+            <thead><tr id="headRow"></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+          <div id="tableEmpty"></div>
+          <div class="table-footer"><span id="footerCount"></span><span><svg class="i" aria-hidden="true"><use href="#i-lock"/></svg>Completed and cancelled trainings are read-only.</span></div>
+        </div>
+
+        <ul class="tlist" id="tlist" aria-label="Trainings"></ul>
+        <div id="listEmpty"></div>
+        <p class="list-footer" id="listFooter"></p>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- Details drawer -->
+<dialog class="drawer" id="detailsDialog" aria-labelledby="dTitle"></dialog>
+<!-- New / edit form -->
+<dialog class="modal wide" id="formDialog" aria-labelledby="fTitle"></dialog>
+<!-- Cancel confirmation -->
+<dialog class="modal" id="cancelDialog" role="alertdialog" aria-labelledby="cTitle" aria-describedby="cDesc"></dialog>
+<!-- Delete draft confirmation -->
+<dialog class="modal" id="deleteDialog" role="alertdialog" aria-labelledby="xTitle" aria-describedby="xDesc"></dialog>
+<!-- Mobile navigation -->
+<dialog class="nav-drawer" id="navDialog" aria-label="Navigation"></dialog>
+
+<div class="toasts" id="toasts" aria-live="polite" aria-relevant="additions"></div>
+
+<script>
+(() => {
+'use strict';
+/* ---------- Fixed prototype date so the data stays consistent ---------- */
+const TODAY = new Date(2026, 9, 27);
+/* "Needs attention" rule – FICTIONAL, CONFIGURABLE PRODUCT ASSUMPTION (not a confirmed business rule).
+   A training needs attention when it is open for registration, starts within `windowDays`,
+   and has fewer registrations than its own minimum group size (`min`, default `defaultMinimum`). */
+const ATTENTION_RULE = { windowDays: 14, defaultMinimum: 8 };
+
+const LECTURERS = ['Amara Okafor', 'Elena Park', 'Lukas Berg', 'Maya Chen', 'Oliver Reed', 'Sofia Bennett'];
+const CATEGORIES = ['Communication', 'Customer service', 'Data & analytics', 'Leadership', 'People management', 'Productivity', 'Project management', 'Sales', 'Wellbeing'];
+const FORMATS = ['In person', 'Online', 'Hybrid'];
+const STATUSES = ['Draft', 'Published', 'Registration open', 'Completed', 'Cancelled'];
+const STATUS_META = {
+  'Draft': { cls: 'draft', icon: 'i-pencil' },
+  'Published': { cls: 'published', icon: 'i-eye' },
+  'Registration open': { cls: 'open', icon: 'i-dot' },
+  'Completed': { cls: 'completed', icon: 'i-circle-check' },
+  'Cancelled': { cls: 'cancelled', icon: 'i-circle-x' }
+};
+const READ_ONLY = new Set(['Completed', 'Cancelled']);
+const CANCELLABLE = new Set(['Published', 'Registration open']);
+
+/* ---------- Fictional local data ---------- */
+const t = (id, title, category, format, start, end, time, lecturer, capacity, registered, min, status, location, description) =>
+  ({ id, title, category, format, start, end: end || start, timeStart: time[0], timeEnd: time[1], lecturer, capacity, registered, min, status, location, description });
+let trainings = [
+  t('TRN-1042', 'Leading Effective Teams', 'Leadership', 'In person', '2026-11-03', null, ['09:00','16:00'], 'Maya Chen', 20, 4, 8, 'Registration open', 'Tallinn office, Room 3B', 'Practical tools for setting direction, delegating and running effective team meetings.'),
+  t('TRN-1043', 'Project Planning Essentials', 'Project management', 'Hybrid', '2026-11-06', null, ['09:30','16:30'], 'Oliver Reed', 16, 6, 8, 'Registration open', 'Tallinn office, Room 2A + video call', 'Scope, schedule and risk basics for people who run small and medium projects.'),
+  t('TRN-1047', 'Excel for Reporting', 'Data & analytics', 'Online', '2026-11-05', null, ['10:00','13:00'], 'Lukas Berg', 12, 5, 6, 'Registration open', 'Video call', 'Pivot tables, lookups and clean monthly reports.'),
+  t('TRN-1044', 'Data Literacy at Work', 'Data & analytics', 'Online', '2026-11-10', null, ['10:00','15:00'], 'Amara Okafor', 24, 18, 8, 'Registration open', 'Video call', 'Read charts critically and ask better questions of data.'),
+  t('TRN-1050', 'Onboarding New Team Members', 'People management', 'Hybrid', '2026-11-12', null, ['09:00','12:00'], 'Elena Park', 20, 0, 8, 'Published', 'Tallinn office, Room 1C + video call', 'A repeatable first-90-days plan for new colleagues.'),
+  t('TRN-1045', 'Confident Communication', 'Communication', 'In person', '2026-11-17', null, ['09:00','16:00'], 'Sofia Bennett', 20, 0, 8, 'Published', 'Tallinn office, Room 3B', 'Clear, calm communication in meetings and difficult conversations.'),
+  t('TRN-1048', 'Giving Constructive Feedback', 'Communication', 'Online', '2026-11-24', null, ['13:00','16:00'], 'Elena Park', 18, 9, 8, 'Registration open', 'Video call', 'Structured feedback models with practice in small groups.'),
+  t('TRN-1046', 'Coaching for Managers', 'Leadership', 'In person', '2026-12-01', '2026-12-02', ['09:00','16:00'], 'Maya Chen', 16, 0, 8, 'Draft', 'Tallinn office, Room 3B', 'Two-day programme on coaching conversations.'),
+  t('TRN-1049', 'Presentation Skills', 'Communication', 'In person', '2026-12-08', null, ['09:00','15:00'], 'Lukas Berg', 14, 3, 8, 'Registration open', 'Tallinn office, Room 2A', 'Structure, slides and delivery for internal presentations.'),
+  t('TRN-1051', 'Negotiation Fundamentals', 'Sales', 'In person', '2027-01-14', null, ['09:00','16:00'], 'Oliver Reed', 16, 0, 8, 'Draft', 'Tallinn office, Room 1C', 'Preparation, anchoring and win-win outcomes.'),
+  t('TRN-1039', 'Customer Experience Design', 'Customer service', 'In person', '2026-10-29', null, ['09:30','16:30'], 'Amara Okafor', 20, 0, 8, 'Cancelled', 'Tallinn office, Room 2A', 'Mapping customer journeys and fixing pain points.'),
+  t('TRN-1041', 'Agile Fundamentals', 'Project management', 'Online', '2026-10-22', null, ['09:00','16:00'], 'Oliver Reed', 24, 22, 8, 'Completed', 'Video call', 'Scrum and Kanban basics for cross-functional teams.'),
+  t('TRN-1040', 'Workplace Wellbeing', 'Wellbeing', 'Hybrid', '2026-10-15', null, ['10:00','15:00'], 'Sofia Bennett', 20, 16, 8, 'Completed', 'Tallinn office, Room 1C + video call', 'Energy, focus and healthy routines at work.'),
+  t('TRN-1038', 'Time Management Basics', 'Productivity', 'Online', '2026-10-08', null, ['13:00','16:00'], 'Maya Chen', 30, 27, 8, 'Completed', 'Video call', 'Prioritising, planning and protecting focus time.')
+];
+
+/* ---------- State ---------- */
+const state = { query: '', filter: 'all', sort: 'attention', flashId: null, ruleOpen: false };
+
+/* ---------- Helpers ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const icon = (id, extra = '') => `<svg class="i ${extra}" aria-hidden="true"><use href="#${id}"/></svg>`;
+const parseDate = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const fmtDate = s => { const d = parseDate(s); return `${String(d.getDate()).padStart(2,'0')} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`; };
+const fmtRange = tr => {
+  if (tr.end === tr.start) return fmtDate(tr.start);
+  const a = parseDate(tr.start), b = parseDate(tr.end);
+  if (a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear()) return `${String(a.getDate()).padStart(2,'0')}–${fmtDate(tr.end)}`;
+  return `${fmtDate(tr.start)} – ${fmtDate(tr.end)}`;
+};
+const daysUntil = s => Math.round((parseDate(s) - TODAY) / 86400000);
+const available = tr => Math.max(0, tr.capacity - tr.registered);
+const isReadOnly = tr => READ_ONLY.has(tr.status);
+const canCancel = tr => CANCELLABLE.has(tr.status);
+const canDelete = tr => tr.status === 'Draft';
+const needsAttention = tr => tr.status === 'Registration open' && tr.registered < tr.min && daysUntil(tr.start) >= 0 && daysUntil(tr.start) <= ATTENTION_RULE.windowDays;
+const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const byId = id => trainings.find(x => x.id === id);
+const badge = status => { const m = STATUS_META[status]; return `<span class="badge ${m.cls}">${icon(m.icon)}${esc(status)}</span>`; };
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+const domId = id => id.replace(/[^A-Za-z0-9-]/g, '');
+
+$('#today').textContent = `${TODAY.getDate()} ${['January','February','March','April','May','June','July','August','September','October','November','December'][TODAY.getMonth()]} ${TODAY.getFullYear()}`;
+
+/* ---------- Navigation ---------- */
+const NAV = [['Dashboard','i-dashboard'],['Trainings','i-book'],['Registrations','i-clipboard'],['Participants','i-users'],['Certificates','i-award']];
+const navHtml = idPrefix => `<p class="nav-label" id="${idPrefix}-label">Workspace</p><ul class="nav-list" aria-labelledby="${idPrefix}-label">${NAV.map(([n, ic]) =>
+  `<li><a class="nav-link" href="#${n.toLowerCase()}" ${n === 'Trainings' ? 'aria-current="page"' : `data-unavailable="${n}"`}>${icon(ic)}${n}</a></li>`).join('')}</ul>`;
+document.querySelector('.nav-slot').innerHTML = navHtml('nav');
+
+/* ---------- Derived data ---------- */
+function searchMatches() {
+  const q = norm(state.query.trim());
+  if (!q) return trainings.slice();
+  return trainings.filter(tr => norm(tr.title).includes(q) || norm(tr.id).includes(q) || norm(tr.lecturer).includes(q));
+}
+function applyFilter(list) {
+  if (state.filter === 'all') return list;
+  if (state.filter === 'attention') return list.filter(needsAttention);
+  return list.filter(tr => tr.status === state.filter);
+}
+function sortList(list) {
+  const out = list.slice();
+  const cmpText = (a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' });
+  if (state.sort === 'attention') {
+    const rank = tr => needsAttention(tr) ? 0 : isReadOnly(tr) ? 2 : 1;
+    return out.sort((a, b) => rank(a) - rank(b) || (rank(a) === 2 ? cmpText(b.start, a.start) : cmpText(a.start, b.start)) || cmpText(a.title, b.title));
+  }
+  const [key, dir] = state.sort.split('-');
+  const m = dir === 'desc' ? -1 : 1;
+  const val = {
+    name: (a, b) => cmpText(a.title, b.title),
+    date: (a, b) => cmpText(a.start, b.start) || cmpText(a.timeStart, b.timeStart),
+    lecturer: (a, b) => cmpText(a.lecturer, b.lecturer),
+    seats: (a, b) => available(a) - available(b)
+  }[key];
+  return out.sort((a, b) => m * val(a, b) || cmpText(a.title, b.title));
+}
+
+/* ---------- Rendering ---------- */
+const COLS = [['name','Training','Sort by training name'],['date','Starts','Sort by start date'],['lecturer','Lecturer','Sort by lecturer'],['seats','Seats','Sort by available seats'],[null,'Status'],[null,'Actions']];
+
+function renderHead() {
+  const [key, dir] = state.sort === 'attention' ? [null, null] : state.sort.split('-');
+  $('#headRow').innerHTML = COLS.map(([k, label]) => {
+    if (!k) return `<th scope="col">${label}</th>`;
+    const active = k === key;
+    const ariaSort = active ? (dir === 'asc' ? 'ascending' : 'descending') : 'none';
+    const ic = active ? (dir === 'asc' ? 'i-arrow-up' : 'i-arrow-down') : 'i-sort';
+    const extra = k === 'seats' ? '<span class="sr-only"> (available seats)</span>' : '';
+    return `<th scope="col" aria-sort="${ariaSort}"><button type="button" class="sort-btn" data-sort="${k}">${label}${extra}${icon(ic)}</button></th>`;
+  }).join('');
+}
+
+function chipDefs(base) {
+  const count = s => base.filter(tr => tr.status === s).length;
+  return [
+    ['all', 'All', base.length],
+    ['attention', 'Needs attention', base.filter(needsAttention).length],
+    ...STATUSES.map(s => [s, s, count(s)])
+  ];
+}
+function renderChips(base) {
+  $('#chips').innerHTML = chipDefs(base).map(([key, label, n]) =>
+    `<li><button type="button" class="chip${key === 'attention' ? ' attention' : ''}" data-filter="${esc(key)}" aria-pressed="${state.filter === key}">${icon('i-check', 'check')}${key === 'attention' ? icon('i-alert', 'warn') : ''}<span>${esc(label)}</span><span class="count" aria-hidden="true">${n}</span><span class="sr-only">, ${plural(n, 'training', 'trainings')}</span></button></li>`).join('');
+}
+
+function ruleDisclosure() {
+  return `<details class="rule" id="ruleInfo"${state.ruleOpen ? ' open' : ''}><summary>${icon('i-chevron-right')}How is this calculated?</summary>
+    <p>“Needs attention” includes trainings that are open for registration, start within the next ${ATTENTION_RULE.windowDays} days and have fewer registrations than their own minimum group size (${ATTENTION_RULE.defaultMinimum} unless set otherwise for the training). In this prototype, these values are fictional assumptions.</p></details>`;
+}
+function renderAlert() {
+  const flagged = trainings.filter(needsAttention);
+  const slot = $('#alertSlot');
+  if (state.filter === 'attention') {
+    slot.innerHTML = `<div class="alert is-active" role="region" aria-label="Registration warning">${icon('i-alert')}
+      <div class="alert-body"><p class="alert-title">Showing ${plural(flagged.length, 'training that needs', 'trainings that need')} more registrations</p>
+      <p class="alert-text">The “Needs attention” filter is on.</p>${ruleDisclosure()}</div>
+      <button type="button" class="btn btn-secondary" id="alertBtn" data-alert="off">Show all trainings</button></div>`;
+    return;
+  }
+  if (!flagged.length) { slot.innerHTML = ''; return; }
+  slot.innerHTML = `<div class="alert" role="region" aria-label="Registration warning">${icon('i-alert')}
+    <div class="alert-body"><p class="alert-title">${plural(flagged.length, 'training needs', 'trainings need')} more registrations</p>
+    <p class="alert-text">Open trainings starting within ${ATTENTION_RULE.windowDays} days are below their minimum group size.</p>${ruleDisclosure()}</div>
+    <button type="button" class="btn btn-secondary" id="alertBtn" data-alert="on">Show ${plural(flagged.length, 'training', 'trainings')}</button></div>`;
+}
+
+function seatNote(tr) {
+  if (tr.status === 'Draft') return 'Not yet published';
+  if (isReadOnly(tr)) return 'Registration closed';
+  return `${available(tr)} available`;
+}
+function seatCell(tr) {
+  const warn = needsAttention(tr);
+  return `<div class="seats">${tr.registered} / ${tr.capacity}${warn ? icon('i-alert') : ''}</div>` +
+    (warn ? `<div class="below-min">Below min. ${tr.min}</div>` : `<div class="t-sub">${seatNote(tr)}</div>`);
+}
+function actionButtons(tr, prefix) {
+  const did = domId(tr.id), name = `<span class="sr-only"> ${esc(tr.title)}</span>`;
+  let h = `<button type="button" class="btn btn-ghost" id="${prefix}view-${did}" data-act="view" data-id="${tr.id}" aria-haspopup="dialog">View${name}</button>`;
+  if (isReadOnly(tr)) return h + `<span class="readonly">${icon('i-lock')}Read-only</span>`;
+  h += `<button type="button" class="btn btn-ghost" id="${prefix}edit-${did}" data-act="edit" data-id="${tr.id}" aria-haspopup="dialog">Edit${name}</button>`;
+  if (canDelete(tr)) h += `<button type="button" class="btn btn-ghost danger" id="${prefix}delete-${did}" data-act="delete" data-id="${tr.id}" aria-haspopup="dialog">Delete draft${name}</button>`;
+  if (canCancel(tr)) h += `<button type="button" class="btn btn-ghost danger" id="${prefix}cancel-${did}" data-act="cancel" data-id="${tr.id}" aria-haspopup="dialog">Cancel${name}</button>`;
+  return h;
+}
+
+function emptyHtml(base) {
+  const q = state.query.trim();
+  let title, text, iconId = 'i-search-x';
+  const btns = [];
+  if (!trainings.length) { title = 'No trainings yet'; text = 'Create your first training to start taking registrations.'; iconId = 'i-book'; }
+  else if (state.filter === 'attention' && !q) { title = 'No trainings need attention right now'; text = 'Every open training starting soon has reached its minimum group size.'; iconId = 'i-circle-check'; btns.push(['filter', 'Show all trainings']); }
+  else if (q && base.length === 0) { title = `No trainings match “${esc(q)}”`; text = 'Check the spelling, or search by training ID (e.g. TRN-1042) or lecturer name.'; btns.push(['search', 'Clear search']); if (state.filter !== 'all') btns.push(['all', 'Reset search and filters']); }
+  else { const f = state.filter === 'attention' ? 'Needs attention' : state.filter; title = q ? `No “${esc(f)}” trainings match “${esc(q)}”` : `No trainings with status “${esc(f)}”`; text = 'Try another status, or reset the filters to see all trainings.'; btns.push(['filter', 'Show all statuses']); if (q) btns.push(['all', 'Reset search and filters']); }
+  return `<div class="empty"><div class="empty-icon">${icon(iconId)}</div><div><h2>${title}</h2><p>${text}</p></div>
+    <div class="row">${btns.map(([k, l], i) => `<button type="button" class="btn ${i === 0 ? 'btn-secondary' : 'btn-ghost'}" data-reset="${k}">${l}</button>`).join('')}</div></div>`;
+}
+
+let liveTimer;
+function render() {
+  const base = searchMatches();
+  const filtered = applyFilter(base);
+  const list = sortList(filtered);
+  const total = trainings.length;
+  const active = state.query.trim() || state.filter !== 'all';
+
+  renderHead(); renderChips(base); renderAlert();
+  $('#sort').value = state.sort;
+  $('#clearSearch').hidden = !state.query;
+  $('#resetAll').hidden = !active;
+
+  const ctx = [];
+  if (state.filter === 'attention') ctx.push('Needs attention');
+  else if (state.filter !== 'all') ctx.push(state.filter);
+  if (state.query.trim()) ctx.push(`matching “${state.query.trim()}”`);
+  const countText = active ? `${list.length} of ${plural(total, 'training', 'trainings')}${ctx.length ? ' · ' + ctx.join(' · ') : ''}` : plural(total, 'training', 'trainings');
+  $('#resultCount').textContent = countText;
+  $('#tableCaption').textContent = `Trainings, ${countText}`;
+  $('#footerCount').textContent = list.length ? `Showing ${list.length} of ${plural(total, 'training', 'trainings')}` : `Showing 0 of ${plural(total, 'training', 'trainings')}`;
+  $('#listFooter').textContent = $('#footerCount').textContent + ' · Completed and cancelled trainings are read-only.';
+
+  $('#tbody').innerHTML = list.map(tr => {
+    const att = needsAttention(tr);
+    return `<tr class="${att ? 'attention' : ''}${tr.id === state.flashId ? ' flash' : ''}">
+      <td><div class="t-name">${esc(tr.title)}</div><div class="t-sub">${esc(tr.id)}${att ? '<span class="sr-only">, needs attention</span>' : ''}</div></td>
+      <td><div class="t-date">${fmtRange(tr)}</div><div class="t-sub">${esc(tr.timeStart)}–${esc(tr.timeEnd)}</div></td>
+      <td>${esc(tr.lecturer)}</td>
+      <td>${seatCell(tr)}</td>
+      <td>${badge(tr.status)}</td>
+      <td><div class="actions">${actionButtons(tr, 't-')}</div></td></tr>`;
+  }).join('');
+  $('#tlist').innerHTML = list.map(tr => {
+    const att = needsAttention(tr);
+    return `<li class="tcard${att ? ' attention' : ''}">
+      <div class="tcard-head"><h3>${esc(tr.title)}</h3>${badge(tr.status)}</div>
+      <div class="t-sub">${esc(tr.id)} · ${fmtRange(tr)} · ${esc(tr.timeStart)}–${esc(tr.timeEnd)}</div>
+      <div class="t-sub">${icon('i-user').replace('class="i ', 'class="i " style="width:14px;height:14px;vertical-align:-2px" ')} ${esc(tr.lecturer)}</div>
+      <div class="seats">${tr.registered} / ${tr.capacity} seats${att ? `${icon('i-alert')}<span class="below-min">Below min. ${tr.min}</span>` : `<span class="t-sub" style="font-weight:400">· ${seatNote(tr)}</span>`}</div>
+      <div class="actions">${actionButtons(tr, 'm-')}</div></li>`;
+  }).join('');
+  const empty = list.length ? '' : emptyHtml(base);
+  $('#tableEmpty').innerHTML = empty; $('#listEmpty').innerHTML = empty ? `<div class="card">${empty}</div>` : '';
+  $('#tlist').hidden = !list.length;
+  state.flashId = null;
+
+  clearTimeout(liveTimer);
+  liveTimer = setTimeout(() => { $('#live').textContent = `${plural(list.length, 'training', 'trainings')} shown.`; }, 400);
+}
+
+/* ---------- Toasts ---------- */
+function toast(msg, opts = {}) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `${icon(opts.icon || 'i-circle-check')}<div class="t-msg">${msg}${opts.action ? `<br><button type="button" class="t-act">${esc(opts.action.label)}</button>` : ''}</div><button type="button" class="btn btn-icon" aria-label="Dismiss notification">${icon('i-x')}</button>`;
+  const remove = () => { if (el.isConnected) el.remove(); };
+  el.querySelector('.btn-icon').addEventListener('click', remove);
+  if (opts.action) el.querySelector('.t-act').addEventListener('click', () => { opts.action.run(); remove(); });
+  $('#toasts').appendChild(el);
+  let timer = setTimeout(remove, opts.action ? 10000 : 6000);
+  el.addEventListener('mouseenter', () => clearTimeout(timer));
+  el.addEventListener('focusin', () => clearTimeout(timer));
+  el.addEventListener('mouseleave', () => { timer = setTimeout(remove, 4000); });
+}
+
+/* ---------- Dialog management (Escape, focus return) ---------- */
+let returnFocus = null; // { ids: [...], fallback }
+function focusFirstAvailable(target) {
+  if (!target) return;
+  for (const id of target.ids || []) { const el = document.getElementById(id); if (el && el.offsetParent !== null) { el.focus(); return; } }
+  (target.fallback ? document.querySelector(target.fallback) : $('#pageTitle'))?.focus();
+}
+function rowTargets(id, prefer) {
+  const d = domId(id);
+  const order = prefer === 'view' ? ['view'] : [prefer, 'view'];
+  const ids = [];
+  for (const p of ['t-', 'm-']) for (const a of order) ids.push(`${p}${a}-${d}`);
+  return ids;
+}
+function openDialog(dlg, focusEl) {
+  dlg.showModal();
+  (focusEl || dlg.querySelector('[autofocus]') || dlg.querySelector('button, input, select, textarea'))?.focus();
+}
+function closeDialog(dlg, target) {
+  if (dlg.open) dlg.close();
+  const tgt = target || dlg._return;
+  dlg._return = null;
+  requestAnimationFrame(() => focusFirstAvailable(tgt));
+}
+document.querySelectorAll('dialog').forEach(dlg => {
+  dlg.addEventListener('cancel', e => { e.preventDefault(); closeDialog(dlg); }); // Escape
+  dlg.addEventListener('click', e => { if (e.target !== dlg || dlg.id === 'formDialog') return; const r = dlg.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) closeDialog(dlg); }); // backdrop click (not for forms, to protect input)
+});
+
+/* ---------- Details drawer ---------- */
+function openDetails(id, ret) {
+  const tr = byId(id); if (!tr) return;
+  const dlg = $('#detailsDialog');
+  const att = needsAttention(tr);
+  const pct = Math.min(100, Math.round(tr.registered / tr.capacity * 100));
+  const days = daysUntil(tr.start);
+  const when = days > 0 ? `in ${plural(days, 'day', 'days')}` : days === 0 ? 'today' : `${plural(-days, 'day', 'days')} ago`;
+  dlg.innerHTML = `
+    <div class="modal-head"><div style="flex:1;min-width:0"><p class="d-id">${esc(tr.id)} · ${esc(tr.category)}</p><h2 id="dTitle">${esc(tr.title)}</h2><div style="margin-top:8px">${badge(tr.status)}</div></div>
+      <button type="button" class="btn btn-icon" data-close aria-label="Close details">${icon('i-x')}</button></div>
+    <div class="modal-body">
+      ${att ? `<div class="inline-alert">${icon('i-alert')}<div><strong>Needs attention.</strong> ${tr.registered} of the minimum ${tr.min} registrations, starting ${when}.</div></div>` : ''}
+      ${isReadOnly(tr) ? `<div class="inline-alert neutral">${icon('i-lock')}<div>${esc(tr.status)} trainings are read-only. They can be viewed but not edited or cancelled.</div></div>` : ''}
+      <dl class="dl">
+        <dt>${icon('i-calendar')}Dates</dt><dd>${fmtRange(tr)} <span class="t-sub">(${when})</span></dd>
+        <dt>${icon('i-clock')}Time</dt><dd>${esc(tr.timeStart)}–${esc(tr.timeEnd)} CET</dd>
+        <dt>${icon('i-user')}Lecturer</dt><dd>${esc(tr.lecturer)}</dd>
+        <dt>${icon('i-monitor')}Format</dt><dd>${esc(tr.format)}</dd>
+        <dt>${icon('i-pin')}Location</dt><dd>${esc(tr.location || 'Not set')}</dd>
+        <dt>${icon('i-tag')}Category</dt><dd>${esc(tr.category)}</dd>
+        <dt>${icon('i-seat')}Capacity</dt><dd>${tr.capacity} seats · minimum group size ${tr.min}</dd>
+        <dt>${icon('i-users')}Registrations</dt><dd>${tr.registered} registered · ${available(tr)} seats available
+          <div class="meter${att ? ' low' : ''}" aria-hidden="true"><span style="width:${pct}%"></span></div></dd>
+      </dl>
+      ${tr.description ? `<div><h3 style="font-size:13px;margin:0 0 4px;color:var(--text-secondary)">Description</h3><p style="margin:0">${esc(tr.description)}</p></div>` : ''}
+    </div>
+    <div class="modal-foot">${isReadOnly(tr) ? `<button type="button" class="btn btn-secondary" data-close>Close</button>` :
+      `<button type="button" class="btn btn-secondary" data-dact="edit">${icon('i-pencil')}Edit training</button>${canDelete(tr) ? `<button type="button" class="btn btn-ghost danger" style="height:40px" data-dact="delete">Delete draft</button>` : ''}${canCancel(tr) ? `<button type="button" class="btn btn-ghost danger" style="height:40px" data-dact="cancel">Cancel training</button>` : ''}`}</div>`;
+  dlg._return = ret || { ids: rowTargets(id, 'view') };
+  dlg.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => closeDialog(dlg)));
+  dlg.querySelectorAll('[data-dact]').forEach(b => b.addEventListener('click', () => {
+    const back = dlg._return; dlg.close(); dlg._return = null;
+    if (b.dataset.dact === 'edit') openForm(id, back); else if (b.dataset.dact === 'delete') openDelete(id, back); else openCancel(id, back);
+  }));
+  openDialog(dlg, dlg.querySelector('[data-close]'));
+}
+
+/* ---------- New / edit form ---------- */
+const pad = n => String(n).padStart(2, '0');
+const isoToday = `${TODAY.getFullYear()}-${pad(TODAY.getMonth() + 1)}-${pad(TODAY.getDate())}`;
+
+function openForm(id, ret) {
+  const editing = id ? byId(id) : null;
+  if (editing && isReadOnly(editing)) { toast(`${esc(editing.status)} trainings are read-only and can’t be edited.`, { icon: 'i-lock' }); return; }
+  const v = editing || { title: '', category: '', format: '', start: '', end: '', timeStart: '09:00', timeEnd: '16:00', capacity: '', min: ATTENTION_RULE.defaultMinimum, lecturer: '', location: '', description: '', status: 'Draft', registered: 0 };
+  const dlg = $('#formDialog');
+  const opt = (list, sel, ph) => `<option value="">${ph}</option>` + list.map(x => `<option${x === sel ? ' selected' : ''}>${esc(x)}</option>`).join('');
+  const err = name => `<p class="error" id="${name}-error" hidden></p>`;
+  dlg.innerHTML = `
+    <form id="trainingForm" novalidate style="display:contents">
+      <div class="modal-head"><h2 id="fTitle">${editing ? `Edit “${esc(editing.title)}”` : 'New training'}</h2>
+        <button type="button" class="btn btn-icon" data-close aria-label="Close without saving">${icon('i-x')}</button></div>
+      <div class="modal-body">
+        <div id="errorSummary" class="error-summary" tabindex="-1" role="alert" hidden></div>
+        <p class="form-note">Fields marked <span class="req" aria-hidden="true">*</span><span class="sr-only">with an asterisk</span> are required.${editing ? ` Status: ${esc(editing.status)} · ${editing.registered} registered.` : ' New trainings are saved as Draft.'}</p>
+        <div class="form-grid">
+          <div class="field full"><label for="f-title">Title <span class="req" aria-hidden="true">*</span></label>
+            <input class="input" id="f-title" name="title" maxlength="80" required aria-required="true" aria-describedby="title-error" value="${esc(v.title)}">${err('title')}</div>
+          <div class="field"><label for="f-category">Category <span class="req" aria-hidden="true">*</span></label>
+            <span class="select-wrap"><select class="select" id="f-category" name="category" required aria-required="true" aria-describedby="category-error">${opt(CATEGORIES, v.category, 'Select a category')}</select></span>${err('category')}</div>
+          <div class="field"><label for="f-lecturer">Lecturer <span class="req" aria-hidden="true">*</span></label>
+            <span class="select-wrap"><select class="select" id="f-lecturer" name="lecturer" required aria-required="true" aria-describedby="lecturer-error">${opt(LECTURERS, v.lecturer, 'Select a lecturer')}</select></span>${err('lecturer')}</div>
+          <fieldset class="full" id="f-format" role="radiogroup" aria-labelledby="f-format-legend" aria-describedby="format-error" aria-required="true"><legend id="f-format-legend">Format <span class="req" aria-hidden="true">*</span></legend>
+            <div class="radios">${FORMATS.map((f, i) => `<label class="radio"><input type="radio" name="format" value="${f}" ${f === v.format ? 'checked' : ''} ${i === 0 ? 'id="f-format-first"' : ''}><span>${f}</span></label>`).join('')}</div>${err('format')}</fieldset>
+          <div class="field"><label for="f-start">Start date <span class="req" aria-hidden="true">*</span></label>
+            <input class="input" type="date" id="f-start" name="start" required aria-required="true" aria-describedby="start-error" value="${esc(v.start)}">${err('start')}</div>
+          <div class="field"><label for="f-end">End date <span class="t-sub" style="font-weight:400">(optional)</span></label>
+            <input class="input" type="date" id="f-end" name="end" aria-describedby="end-hint end-error" value="${v.end && v.end !== v.start ? esc(v.end) : ''}"><p class="hint" id="end-hint">Leave empty for one-day trainings.</p>${err('end')}</div>
+          <div class="field"><label for="f-timeStart">Start time</label><input class="input" type="time" id="f-timeStart" name="timeStart" aria-describedby="timeStart-error" value="${esc(v.timeStart)}">${err('timeStart')}</div>
+          <div class="field"><label for="f-timeEnd">End time</label><input class="input" type="time" id="f-timeEnd" name="timeEnd" aria-describedby="timeEnd-error" value="${esc(v.timeEnd)}">${err('timeEnd')}</div>
+          <div class="field"><label for="f-capacity">Seats <span class="req" aria-hidden="true">*</span></label>
+            <input class="input" type="number" inputmode="numeric" min="1" max="200" step="1" id="f-capacity" name="capacity" required aria-required="true" aria-describedby="capacity-hint capacity-error" value="${esc(v.capacity)}"><p class="hint" id="capacity-hint">Total places, 1–200.${editing && editing.registered ? ` At least ${editing.registered} (already registered).` : ''}</p>${err('capacity')}</div>
+          <div class="field"><label for="f-min">Minimum group size</label>
+            <input class="input" type="number" inputmode="numeric" min="1" max="200" step="1" id="f-min" name="min" aria-describedby="min-hint min-error" value="${esc(v.min)}"><p class="hint" id="min-hint">Used for the “Needs attention” warning.</p>${err('min')}</div>
+          ${editing ? `<div class="field full"><label for="f-status">Status</label>
+            <span class="select-wrap"><select class="select" id="f-status" name="status" aria-describedby="status-hint status-error">${['Draft','Published','Registration open'].map(s => `<option${s === v.status ? ' selected' : ''}>${s}</option>`).join('')}</select></span>
+            <p class="hint" id="status-hint">Completed and Cancelled can’t be set here. To cancel a published or open training, use “Cancel training”.</p>${err('status')}</div>` : ''}
+          <div class="field full"><label for="f-location">Location or meeting link <span class="t-sub" style="font-weight:400">(optional)</span></label>
+            <input class="input" id="f-location" name="location" maxlength="120" value="${esc(v.location)}"></div>
+          <div class="field full"><label for="f-description">Description <span class="t-sub" style="font-weight:400">(optional)</span></label>
+            <textarea class="input" id="f-description" name="description" maxlength="500" rows="3">${esc(v.description)}</textarea></div>
+        </div>
+      </div>
+      <div class="modal-foot"><button type="button" class="btn btn-secondary" data-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">${editing ? 'Save changes' : 'Create draft training'}</button></div>
+    </form>`;
+  dlg._return = ret || (editing ? { ids: rowTargets(id, 'edit') } : { ids: ['newBtn'] });
+  const form = $('#trainingForm');
+  let attempted = false;
+  dlg.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => closeDialog(dlg)));
+  form.addEventListener('input', () => { if (attempted) validate(form, editing, false); });
+  form.addEventListener('change', () => { if (attempted) validate(form, editing, false); });
+  form.addEventListener('submit', e => {
+    e.preventDefault(); attempted = true;
+    const data = validate(form, editing, true);
+    if (!data) return;
+    if (editing) {
+      Object.assign(editing, data);
+      state.flashId = editing.id;
+      closeDialog(dlg); render();
+      toast(`Changes to “${esc(editing.title)}” saved.`);
+    } else {
+      const next = Math.max(...trainings.map(x => Number(x.id.split('-')[1]) || 0), 1000) + 1;
+      const tr = { id: `TRN-${next}`, registered: 0, status: 'Draft', ...data };
+      trainings.push(tr);
+      state.flashId = tr.id;
+      closeDialog(dlg); render();
+      const visible = applyFilter(searchMatches()).some(x => x.id === tr.id);
+      toast(`“${esc(tr.title)}” was added as a Draft (${tr.id}).${visible ? '' : ' It’s hidden by the current search or filter.'}`,
+        visible ? {} : { action: { label: 'Reset search and filters', run: () => { state.query = ''; $('#search').value = ''; state.filter = 'all'; state.flashId = tr.id; render(); } } });
+    }
+  });
+  openDialog(dlg, $('#f-title'));
+}
+
+function validate(form, editing, focus) {
+  const f = new FormData(form);
+  const get = k => (f.get(k) ?? '').toString().trim();
+  const errors = [];
+  const add = (name, fieldId, msg) => errors.push({ name, fieldId, msg });
+  const title = get('title'), category = get('category'), lecturer = get('lecturer'), format = get('format');
+  const start = get('start'), end = get('end'), timeStart = get('timeStart'), timeEnd = get('timeEnd');
+  const capRaw = get('capacity'), minRaw = get('min');
+  const status = editing ? get('status') : 'Draft';
+
+  if (!title) add('title', 'f-title', 'Enter a training title.');
+  else if (title.length < 3) add('title', 'f-title', 'Title must be at least 3 characters.');
+  if (!category) add('category', 'f-category', 'Select a category.');
+  if (!lecturer) add('lecturer', 'f-lecturer', 'Select a lecturer.');
+  if (!format) add('format', 'f-format-first', 'Choose a format: In person, Online or Hybrid.');
+  if (!start) add('start', 'f-start', 'Enter a start date.');
+  else if (!/^\d{4}-\d{2}-\d{2}$/.test(start)) add('start', 'f-start', 'Enter the start date as a full date, e.g. 03/11/2026.');
+  else if (start < isoToday && (!editing || start !== editing.start)) add('start', 'f-start', `Start date can’t be in the past (today is ${fmtDate(isoToday)}).`);
+  if (end && start && end < start) add('end', 'f-end', 'End date must be on or after the start date.');
+  if (timeStart && timeEnd && timeEnd <= timeStart) add('timeEnd', 'f-timeEnd', 'End time must be later than the start time.');
+  const cap = Number(capRaw);
+  if (!capRaw) add('capacity', 'f-capacity', 'Enter the number of seats.');
+  else if (!Number.isInteger(cap) || cap < 1 || cap > 200) add('capacity', 'f-capacity', 'Seats must be a whole number between 1 and 200.');
+  else if (editing && cap < editing.registered) add('capacity', 'f-capacity', `Seats can’t be fewer than the ${editing.registered} people already registered.`);
+  const min = minRaw ? Number(minRaw) : ATTENTION_RULE.defaultMinimum;
+  if (minRaw && (!Number.isInteger(min) || min < 1)) add('min', 'f-min', 'Minimum group size must be a whole number of at least 1.');
+  else if (capRaw && Number.isInteger(cap) && min > cap) add('min', 'f-min', 'Minimum group size can’t be larger than the number of seats.');
+  if (editing && status === 'Draft' && editing.registered > 0) add('status', 'f-status', 'A training with registrations can’t go back to Draft.');
+
+  // Reset all error displays
+  form.querySelectorAll('.error').forEach(p => { p.hidden = true; p.innerHTML = ''; });
+  form.querySelectorAll('[aria-invalid]').forEach(el => el.removeAttribute('aria-invalid'));
+  for (const e of errors) {
+    const p = form.querySelector(`#${e.name}-error`);
+    if (p) { p.hidden = false; p.innerHTML = `${icon('i-alert')}<span>${esc(e.msg)}</span>`; }
+    const el = e.name === 'format' ? form.querySelector('#f-format') : form.querySelector('#' + e.fieldId);
+    el?.setAttribute('aria-invalid', 'true');
+  }
+  const summary = form.querySelector('#errorSummary');
+  if (errors.length) {
+    summary.hidden = false;
+    summary.innerHTML = `<h3>${errors.length === 1 ? 'There is 1 problem' : `There are ${errors.length} problems`} with this form</h3><ul>${errors.map(e => `<li><a href="#${e.fieldId}" data-focus="${e.fieldId}">${esc(e.msg)}</a></li>`).join('')}</ul>`;
+    summary.querySelectorAll('a').forEach(a => a.addEventListener('click', ev => { ev.preventDefault(); form.querySelector('#' + a.dataset.focus)?.focus(); }));
+    if (focus) summary.focus();
+    return null;
+  }
+  summary.hidden = true; summary.innerHTML = '';
+  return { title, category, lecturer, format, start, end: end || start, timeStart: timeStart || '09:00', timeEnd: timeEnd || '16:00', capacity: cap, min, status, location: get('location'), description: get('description') };
+}
+
+/* ---------- Cancel confirmation ---------- */
+function openCancel(id, ret) {
+  const tr = byId(id); if (!tr) return;
+  if (!canCancel(tr)) { toast(tr.status === 'Draft' ? 'Drafts can’t be cancelled. Use “Delete draft” instead.' : `${esc(tr.status)} trainings can’t be cancelled.`, { icon: 'i-lock' }); return; }
+  const dlg = $('#cancelDialog');
+  const items = [`Its status changes to <strong>Cancelled</strong> and it becomes read-only.`];
+  if (tr.status === 'Registration open') items.push('Registration closes and no new participants can register.');
+  if (tr.registered > 0) items.push(`${plural(tr.registered, 'person is', 'people are')} registered. Their registrations stay on record.`);
+  dlg.innerHTML = `
+    <div class="modal-head"><span class="danger-mark">${icon('i-alert')}</span><h2 id="cTitle">Cancel “${esc(tr.title)}”?</h2>
+      <button type="button" class="btn btn-icon" data-keep aria-label="Close and keep training">${icon('i-x')}</button></div>
+    <div class="modal-body" id="cDesc">
+      <div class="summary-box"><div><div class="t-name">${esc(tr.title)}</div><div class="t-sub">${esc(tr.id)} · ${fmtRange(tr)} · ${esc(tr.timeStart)}–${esc(tr.timeEnd)} CET · ${esc(tr.lecturer)}</div></div>
+        <div class="row"><span>${tr.registered} / ${tr.capacity} seats registered</span>${badge(tr.status)}</div></div>
+      <div><p class="strong-note" style="margin-bottom:8px">If you cancel this training:</p><ul class="consequences">${items.map(i => `<li>${i}</li>`).join('')}</ul></div>
+      <p class="strong-note">This can’t be undone.</p>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-keep autofocus>Keep training</button>
+      <button type="button" class="btn btn-destructive" data-confirm>Cancel training</button></div>`;
+  dlg._return = ret || { ids: rowTargets(id, 'cancel') };
+  dlg.querySelectorAll('[data-keep]').forEach(b => b.addEventListener('click', () => closeDialog(dlg)));
+  dlg.querySelector('[data-confirm]').addEventListener('click', () => {
+    const fresh = byId(id);
+    if (!fresh || !canCancel(fresh)) { closeDialog(dlg); return; }
+    fresh.status = 'Cancelled';
+    state.flashId = fresh.id;
+    dlg.close(); dlg._return = null;
+    render();
+    focusFirstAvailable({ ids: rowTargets(id, 'view') });
+    toast(`“${esc(fresh.title)}” is now Cancelled.`);
+  });
+  openDialog(dlg, dlg.querySelector('.modal-foot [data-keep]'));
+}
+
+/* ---------- Delete draft confirmation ---------- */
+function openDelete(id, ret) {
+  const tr = byId(id); if (!tr) return;
+  if (!canDelete(tr)) { toast('Only drafts can be deleted.', { icon: 'i-lock' }); return; }
+  const dlg = $('#deleteDialog');
+  dlg.innerHTML = `
+    <div class="modal-head"><span class="danger-mark">${icon('i-alert')}</span><h2 id="xTitle">Delete draft “${esc(tr.title)}”?</h2>
+      <button type="button" class="btn btn-icon" data-keep aria-label="Close and keep draft">${icon('i-x')}</button></div>
+    <div class="modal-body" id="xDesc">
+      <div class="summary-box"><div><div class="t-name">${esc(tr.title)}</div><div class="t-sub">${esc(tr.id)} · ${fmtRange(tr)} · ${esc(tr.timeStart)}–${esc(tr.timeEnd)} CET · ${esc(tr.lecturer)}</div></div>
+        <div class="row"><span>${tr.capacity} seats planned · not yet published</span>${badge(tr.status)}</div></div>
+      <div><p class="strong-note" style="margin-bottom:8px">If you delete this draft:</p><ul class="consequences"><li>It is removed from the training list.</li><li>It was never published, so nobody could register for it.</li></ul></div>
+      <p class="strong-note">This can’t be undone.</p>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-secondary" data-keep autofocus>Keep draft</button>
+      <button type="button" class="btn btn-destructive" data-confirm>Delete draft</button></div>`;
+  dlg._return = ret || { ids: rowTargets(id, 'delete') };
+  dlg.querySelectorAll('[data-keep]').forEach(b => b.addEventListener('click', () => closeDialog(dlg)));
+  dlg.querySelector('[data-confirm]').addEventListener('click', () => {
+    const fresh = byId(id);
+    if (!fresh || !canDelete(fresh)) { closeDialog(dlg); return; }
+    const visible = sortList(applyFilter(searchMatches()));
+    const idx = visible.findIndex(x => x.id === id);
+    const neighbour = visible[idx + 1] || visible[idx - 1];
+    trainings = trainings.filter(x => x.id !== id);
+    dlg.close(); dlg._return = null;
+    render();
+    focusFirstAvailable(neighbour ? { ids: rowTargets(neighbour.id, 'view'), fallback: '#resultCount' } : { fallback: '#resultCount' });
+    toast(`Draft “${esc(fresh.title)}” deleted.`);
+  });
+  openDialog(dlg, dlg.querySelector('.modal-foot [data-keep]'));
+}
+
+/* ---------- Events ---------- */
+const search = $('#search');
+search.addEventListener('input', () => { state.query = search.value; render(); });
+search.addEventListener('keydown', e => { if (e.key === 'Escape' && search.value) { e.preventDefault(); search.value = ''; state.query = ''; render(); } });
+$('#clearSearch').addEventListener('click', () => { search.value = ''; state.query = ''; render(); search.focus(); });
+$('#sort').addEventListener('change', e => { state.sort = e.target.value; render(); });
+$('#resetAll').addEventListener('click', () => { search.value = ''; state.query = ''; state.filter = 'all'; render(); search.focus(); });
+$('#newBtn').addEventListener('click', () => openForm(null));
+
+document.addEventListener('click', e => {
+  const chip = e.target.closest('[data-filter]');
+  if (chip) { state.filter = chip.dataset.filter; render(); document.querySelector(`[data-filter="${CSS.escape(state.filter)}"]`)?.focus(); return; }
+  const sortBtn = e.target.closest('[data-sort]');
+  if (sortBtn) {
+    const k = sortBtn.dataset.sort;
+    const [cur, dir] = state.sort === 'attention' ? [null] : state.sort.split('-');
+    state.sort = `${k}-${cur === k && dir === 'asc' ? 'desc' : 'asc'}`;
+    render(); document.querySelector(`[data-sort="${k}"]`)?.focus(); return;
+  }
+  const alertBtn = e.target.closest('#alertBtn');
+  if (alertBtn) {
+    const on = alertBtn.dataset.alert === 'on';
+    state.filter = on ? 'attention' : 'all';
+    render(); $('#alertBtn')?.focus(); return;
+  }
+  const act = e.target.closest('[data-act]');
+  if (act) {
+    const { id } = act.dataset;
+    if (act.dataset.act === 'view') openDetails(id, { ids: [act.id] });
+    if (act.dataset.act === 'edit') openForm(id, { ids: [act.id] });
+    if (act.dataset.act === 'cancel') openCancel(id, { ids: [act.id, act.id.replace('cancel-', 'view-')] });
+    if (act.dataset.act === 'delete') openDelete(id, { ids: [act.id] });
+    return;
+  }
+  const reset = e.target.closest('[data-reset]');
+  if (reset) {
+    const k = reset.dataset.reset;
+    if (k === 'search' || k === 'all') { search.value = ''; state.query = ''; }
+    if (k === 'filter' || k === 'all') state.filter = 'all';
+    render(); search.focus(); return;
+  }
+  const un = e.target.closest('[data-unavailable]');
+  if (un) { e.preventDefault(); toast(`${esc(un.dataset.unavailable)} isn’t part of this prototype. Only Trainings is interactive.`, { icon: 'i-info' }); }
+});
+
+/* Mobile navigation drawer */
+$('#menuBtn').addEventListener('click', () => {
+  const dlg = $('#navDialog');
+  dlg.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between"><span class="brand"><span class="brand-mark">${icon('i-layers')}</span>Kursion</span>
+    <button type="button" class="btn btn-icon" data-close aria-label="Close navigation">${icon('i-x')}</button></div>
+    <nav aria-label="Workspace">${navHtml('mnav')}</nav>
+    <div style="margin-top:auto" class="account"><a class="nav-link" href="#help" data-unavailable="Help &amp; resources">${icon('i-help')}Help &amp; resources</a>
+    <div class="profile"><span class="avatar" aria-hidden="true">AM</span><div><div class="profile-name">Alex Morgan</div><div class="profile-role">Training Manager</div></div></div></div>`;
+  dlg._return = { ids: ['menuBtn'] };
+  dlg.querySelector('[data-close]').addEventListener('click', () => closeDialog(dlg));
+  dlg.querySelectorAll('.nav-link').forEach(a => a.addEventListener('click', ev => {
+    if (!a.dataset.unavailable) { ev.preventDefault(); closeDialog(dlg, { fallback: '#pageTitle' }); }
+  }));
+  openDialog(dlg, dlg.querySelector('[data-close]'));
+});
+
+document.addEventListener('toggle', e => { if (e.target.id === 'ruleInfo') state.ruleOpen = e.target.open; }, true);
+
+render();
+})();
+</script>
+</body>
+</html>

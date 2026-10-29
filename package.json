@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "prebuild": "node scripts/clean-output.mjs",
+    "build": "BUILD_PIPELINE=1 next build && node scripts/prune-unpublished.mjs && node scripts/verify-unpublished.mjs",
+    "build:preview": "node scripts/clean-output.mjs && BUILD_PIPELINE=1 SHOW_UNPUBLISHED=1 next build && node scripts/verify-unpublished.mjs --preview",
     "start": "npx serve out",
     "lint": "next lint"
   },

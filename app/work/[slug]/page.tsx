@@ -6,8 +6,11 @@ import { getProject, projects } from "@/lib/content/projects";
 
 export const dynamicParams = false;
 
+// Projects with their own route under app/work/<slug>/.
+const DEDICATED = ["ai-ready-design-system", "from-chaos-to-consistency", "from-prompt-to-product"];
+
 export function generateStaticParams() {
-  return projects.map((p) => ({ slug: p.slug }));
+  return projects.filter((p) => !DEDICATED.includes(p.slug)).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
