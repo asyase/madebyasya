@@ -5,7 +5,7 @@ import { ArrowRight, Bot, Check, CircleAlert, CircleDashed, PenTool, Sparkles } 
 import { Swatch, stackedTable } from "@/components/ds-showcase/controls";
 import {
   aiCouldntDecide, asyaContribution, beforeAfter, brandNote, briefTokens, checks, claudeContribution, componentShots, components, conditionalApproval,
-  constraints, contrast, decisions, designedIn, experiment, genStages, journey, lessons, limitations, mainLesson, modeNote, notDone, outcome,
+  constraints, contrast, decisions, designedIn, keyDecisionNumbers, experiment, genStages, journey, lessons, limitations, mainLesson, modeNote, notDone, outcome,
   refinedFrames, refinements, roles, trainingCardTradeOff, uxProblems, variableLayers, variableShots, whyRefinement, whyStage03,
 } from "@/lib/content/drafts/prompt-to-product";
 import { EvidenceImage, ExploreLinks, More, PromptBlock, SourceTag } from "./Evidence";
@@ -57,15 +57,18 @@ export function Overview() {
 export function Roles() {
   return (
     <div className="grid grid-cols-1 gap-4">
-      <p className="rounded-[20px] bg-ink p-5 font-display text-xl font-bold leading-snug tracking-tight text-paper sm:p-6">AI generated and implemented; I directed, evaluated and decided.</p>
+      <div className="rounded-[20px] bg-ink p-5 text-paper sm:p-6">
+        <p className="font-display text-xl font-bold leading-snug tracking-tight">I led the design process; AI supported the execution.</p>
+        <p className="mt-2 max-w-[75ch] leading-relaxed text-paper/80">I defined the experiment, wrote the three prompts, evaluated the outputs, selected Stage 03, identified seven UX problems, made eight documented design decisions and directed the refinement. Figma AI generated the first three screens. Claude proposed solutions and implemented the approved changes, the component library, the variables and the prototype; I reviewed the results at each step.</p>
+      </div>
       <div className={clsx(card, "min-w-0")}>
         <div className="overflow-x-auto">
           <table className={clsx("w-full min-w-[760px] text-left text-sm", stackedTable)}>
-            <caption className="sr-only">Contributions by Asya, Figma AI and Claude at each stage</caption>
+            <caption className="sr-only">My work, Figma AI and Claude at each stage</caption>
             <thead className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-soft">
               <tr className="border-b border-ink/15">
                 <th scope="col" className="w-[16%] py-2 pr-3 font-normal">Stage</th>
-                <th scope="col" className="py-2 pr-3 font-normal"><span className="inline-flex items-center gap-1.5"><PenTool className="h-3.5 w-3.5 text-pink-deep" aria-hidden />Asya</span></th>
+                <th scope="col" className="py-2 pr-3 font-normal"><span className="inline-flex items-center gap-1.5"><PenTool className="h-3.5 w-3.5 text-pink-deep" aria-hidden />My work</span></th>
                 <th scope="col" className="py-2 pr-3 font-normal"><span className="inline-flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5 text-lav-deep" aria-hidden />Figma AI</span></th>
                 <th scope="col" className="py-2 font-normal"><span className="inline-flex items-center gap-1.5"><Bot className="h-3.5 w-3.5 text-lav-deep" aria-hidden />Claude</span></th>
               </tr>
@@ -74,7 +77,7 @@ export function Roles() {
               {roles.map((r) => (
                 <tr key={r.stage} className="border-b border-ink/10 align-top last:border-0">
                   <th scope="row" className="py-3 pr-3 font-semibold">{r.stage}</th>
-                  <td data-label="Asya" className="py-3 pr-3">{r.asya}</td>
+                  <td data-label="My work" className="py-3 pr-3">{r.asya}</td>
                   <td data-label="Figma AI" className="py-3 pr-3 text-ink-soft">{r.figmaAi}</td>
                   <td data-label="Claude" className="py-3 text-ink-soft">{r.claude}</td>
                 </tr>
@@ -130,52 +133,32 @@ export function Generations() {
 /* ------------------------------------------------------------------ 4 · Stage 04 */
 
 export function Refinement() {
+  const keyDecisions = decisions.filter((d) => keyDecisionNumbers.includes(d.n));
   return (
     <div className="grid grid-cols-1 gap-6">
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className={card}>
-          <h3 className={h3}>Why Human Refinement was necessary</h3>
-          <ul className="mt-3 grid gap-1.5 text-[15px]">
-            {whyRefinement.map((t) => <li key={t} className="flex gap-2"><CircleAlert className="mt-1 h-4 w-4 shrink-0 text-pink-deep" aria-hidden />{t}</li>)}
-          </ul>
-          <p className="mt-4 rounded-2xl bg-blush/60 p-4 text-[15px] leading-relaxed">Main lesson: <b>{mainLesson}</b>.</p>
-        </div>
-        <div className="grid grid-cols-1 gap-4">
-          <div className="rounded-[24px] bg-ink p-5 text-paper sm:p-6">
-            <p className="flex items-center gap-2 font-display text-lg font-bold tracking-tight"><PenTool className="h-5 w-5 text-bubblegum" aria-hidden />My contribution – evaluation and decisions</p>
-            <ol className="mt-3 grid gap-1.5 text-[15px]">
-              {asyaContribution.map((t, i) => <li key={t} className="flex gap-2"><span className="w-5 shrink-0 font-mono text-xs leading-6 text-bubblegum">{i + 1}</span>{t}</li>)}
-            </ol>
-          </div>
-          <div className="rounded-[24px] bg-ivory p-5 sm:p-6">
-            <p className="flex items-center gap-2 font-display text-lg font-bold tracking-tight"><Bot className="h-5 w-5 text-lav-deep" aria-hidden />Claude – AI assistance in Figma</p>
-            <ul className="mt-3 grid gap-1.5 text-[15px]">
-              {claudeContribution.map((t) => <li key={t} className="flex gap-2"><ArrowRight className="mt-1 h-4 w-4 shrink-0 text-lav-deep" aria-hidden />{t}</li>)}
-            </ul>
-            <p className="mt-3 text-xs text-ink-soft">The refined frames were not drawn by hand: Claude implemented them through the Figma Plugin API from my decisions.</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-[2fr_1fr]">
-        <div className={card}>
-          <h3 className={h3}>Seven UX problems I identified in Stage 03</h3>
-          <ol className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {uxProblems.map((p, i) => <li key={p} className="flex gap-2 rounded-xl bg-ivory p-3 text-[15px]"><span className="font-mono text-xs leading-6 text-pink-deep">{String(i + 1).padStart(2, "0")}</span>{p}</li>)}
-          </ol>
-        </div>
-        <div className={card}>
-          <h3 className={h3}>My constraints</h3>
-          <ul className="mt-3 grid gap-2 text-[15px]">{constraints.map((c) => <li key={c} className="flex gap-2"><Check className="mt-1 h-4 w-4 shrink-0 text-lav-deep" aria-hidden />{c}</li>)}</ul>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-3">
+      <div className="grid grid-cols-1 gap-4">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h3 className={h3}>Eight decisions</h3>
-          <p className="font-mono text-xs text-ink-soft">4 Accept · 4 Modify · 0 Reject</p>
+          <h3 className="font-display text-2xl font-bold tracking-tight md:text-3xl">My UX decisions</h3>
+          <p className="font-mono text-xs text-ink-soft">8 documented decisions · 4 Accept · 4 Modify · 0 Reject</p>
         </div>
-        <ol className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <p className="max-w-[70ch] text-sm text-ink-soft">Three key decisions whose effect is visible in the before/after screens below. My reasoning is quoted from my design review record.</p>
+        <ol className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+          {keyDecisions.map((d) => (
+            <li key={d.n} className="grid content-start gap-3 rounded-[24px] bg-paper p-5 ring-2 ring-ink/80">
+              <div className="flex items-start justify-between gap-2">
+                <p className="font-display text-xl font-bold leading-tight tracking-tight"><span className="font-mono text-sm text-pink-deep">{String(d.n).padStart(2, "0")} </span>{d.topic}</p>
+                <DecisionChip d={d.decision} />
+              </div>
+              <p className="border-l-2 border-pink-deep pl-3 text-[15px] italic leading-relaxed">“{d.reasoning}”</p>
+              <div className="rounded-2xl bg-ivory p-3">
+                <p className="eyebrow text-ink-soft">Effect on the final interface</p>
+                <p className="mt-1 text-sm font-semibold">{d.implementation}</p>
+              </div>
+              <p className="text-xs text-ink-soft"><span className="font-semibold">AI proposal (Claude): </span>{d.proposal}</p>
+            </li>
+          ))}
+        </ol>
+        <ol className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4" aria-label="All eight decisions">
           {decisions.map((d) => (
             <li key={d.n} className="flex items-start justify-between gap-2 rounded-2xl bg-paper p-3.5 ring-1 ring-ink/10">
               <span><span className="font-mono text-xs text-pink-deep">{String(d.n).padStart(2, "0")}</span> <span className="font-semibold">{d.topic}</span></span>
@@ -202,6 +185,44 @@ export function Refinement() {
             ))}
           </ol>
         </More>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className={card}>
+          <h3 className={h3}>Why Human Refinement was necessary</h3>
+          <ul className="mt-3 grid gap-1.5 text-[15px]">
+            {whyRefinement.map((t) => <li key={t} className="flex gap-2"><CircleAlert className="mt-1 h-4 w-4 shrink-0 text-pink-deep" aria-hidden />{t}</li>)}
+          </ul>
+          <p className="mt-4 rounded-2xl bg-blush/60 p-4 text-[15px] leading-relaxed">Main lesson: <b>{mainLesson}</b>.</p>
+        </div>
+        <div className="grid grid-cols-1 gap-4">
+          <div className="rounded-[24px] bg-ink p-5 text-paper sm:p-6">
+            <p className="flex items-center gap-2 font-display text-lg font-bold tracking-tight"><PenTool className="h-5 w-5 text-bubblegum" aria-hidden />My role – evaluation and decisions</p>
+            <ol className="mt-3 grid gap-1.5 text-[15px]">
+              {asyaContribution.map((t, i) => <li key={t} className="flex gap-2"><span className="w-5 shrink-0 font-mono text-xs leading-6 text-bubblegum">{i + 1}</span>{t}</li>)}
+            </ol>
+          </div>
+          <div className="rounded-[24px] bg-ivory p-5 sm:p-6">
+            <p className="flex items-center gap-2 font-display text-lg font-bold tracking-tight"><Bot className="h-5 w-5 text-lav-deep" aria-hidden />AI-assisted implementation</p>
+            <ul className="mt-3 grid gap-1.5 text-[15px]">
+              {claudeContribution.map((t) => <li key={t} className="flex gap-2"><ArrowRight className="mt-1 h-4 w-4 shrink-0 text-lav-deep" aria-hidden />{t}</li>)}
+            </ul>
+            <p className="mt-3 text-xs text-ink-soft">Claude implemented the approved changes in Figma through the Plugin API; I reviewed each result and requested five further refinements.</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-[2fr_1fr]">
+        <div className={card}>
+          <h3 className={h3}>Seven UX problems I identified in Stage 03</h3>
+          <ol className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {uxProblems.map((p, i) => <li key={p} className="flex gap-2 rounded-xl bg-ivory p-3 text-[15px]"><span className="font-mono text-xs leading-6 text-pink-deep">{String(i + 1).padStart(2, "0")}</span>{p}</li>)}
+          </ol>
+        </div>
+        <div className={card}>
+          <h3 className={h3}>My constraints</h3>
+          <ul className="mt-3 grid gap-2 text-[15px]">{constraints.map((c) => <li key={c} className="flex gap-2"><Check className="mt-1 h-4 w-4 shrink-0 text-lav-deep" aria-hidden />{c}</li>)}</ul>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6">

@@ -15,7 +15,7 @@ export default function Prototype() {
       <div className="flex flex-col gap-4 rounded-[24px] bg-ink p-5 text-paper sm:p-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="max-w-[62ch]">
           <div className="flex flex-wrap gap-1.5">
-            {["HTML · CSS · JavaScript", "Built with Claude", "Not Figma Make", "Fictional data"].map((t) => <span key={t} className="rounded-full border border-paper/30 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.1em]">{t}</span>)}
+            {["HTML · CSS · JavaScript", "Implemented with Claude", "Not Figma Make", "Fictional data"].map((t) => <span key={t} className="rounded-full border border-paper/30 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.1em]">{t}</span>)}
           </div>
           <ul className="mt-3 grid gap-1 text-sm text-paper/80">{prototypeFacts.map((f) => <li key={f}>– {f}</li>)}</ul>
         </div>

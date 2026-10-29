@@ -26,8 +26,8 @@ export type Source = "figma-ai" | "figma-claude" | "prototype" | "code";
 
 export const sourceLabel: Record<Source, string> = {
   "figma-ai": "Figma AI · original, unedited",
-  "figma-claude": "Figma · built by Claude, decided by Asya",
-  prototype: "HTML prototype · built with Claude",
+  "figma-claude": "Figma · implemented with Claude",
+  prototype: "HTML prototype · implemented with Claude",
   code: "Code demo · not Figma",
 };
 
@@ -41,13 +41,13 @@ export const experiment = {
 };
 
 export const journey = [
-  { n: "01", title: "Basic AI generation", who: "Figma AI", anchor: "stages-01-03" },
-  { n: "02", title: "Structured AI generation", who: "Figma AI", anchor: "stages-01-03" },
-  { n: "03", title: "Design-system-guided generation", who: "Figma AI", anchor: "stages-01-03" },
-  { n: "04", title: "Human Refinement", who: "Asya decides · Claude implements", anchor: "human-refinement" },
-  { n: "05", title: "Component library", who: "Claude in Figma · Asya reviews", anchor: "components" },
-  { n: "06", title: "Design variables", who: "Claude in Figma · Asya reviews", anchor: "variables" },
-  { n: "07", title: "Interactive prototype", who: "Claude · HTML/CSS/JS", anchor: "prototype" },
+  { n: "01", title: "Basic AI generation", who: "My prompt · Figma AI", anchor: "stages-01-03" },
+  { n: "02", title: "Structured AI generation", who: "My prompt · Figma AI", anchor: "stages-01-03" },
+  { n: "03", title: "Design-system-guided generation", who: "My prompt · Figma AI", anchor: "stages-01-03" },
+  { n: "04", title: "Human Refinement", who: "My decisions · AI-assisted build", anchor: "human-refinement" },
+  { n: "05", title: "Component library", who: "Directed & reviewed by me · built with Claude", anchor: "components" },
+  { n: "06", title: "Design variables", who: "Directed & reviewed by me · built with Claude", anchor: "variables" },
+  { n: "07", title: "Interactive prototype", who: "Directed & reviewed by me · built with Claude", anchor: "prototype" },
 ] as const;
 
 /* ------------------------------------------------------------------ roles */
@@ -57,7 +57,7 @@ export const roles: { stage: string; asya: string; figmaAi: string; claude: stri
   { stage: "04 · Human Refinement", asya: "Identified seven UX problems, set the constraints, evaluated every proposal, made eight decisions (4 Accept, 4 Modify), reviewed the results and approved the direction.", figmaAi: "–", claude: "Proposed solutions (plus one extra: Delete draft), built proposal frames and annotations via the Figma Plugin API, calculated contrast ratios and implemented the approved changes." },
   { stage: "05 · Components", asya: "Reviewed the components and approved the TrainingCard trade-off.", figmaAi: "–", claude: "Built 11 UI components (52 variants) and 21 icon components in Figma via the Plugin API." },
   { stage: "06 · Variables", asya: "Required alignment with semantic tokens and documented exceptions (decision 4), and reviewed the final result.", figmaAi: "–", claude: "Built 149 variables in three collections and a separate code demo of a second theme." },
-  { stage: "07 · Prototype", asya: "Set the product rules (status-based actions, no email claims, the 14-day rule as a fictional assumption) and reviewed the refined result.", figmaAi: "–", claude: "Built the HTML/CSS/JavaScript prototype and ran the automated checks." },
+  { stage: "07 · Prototype", asya: "Defined the product rules and interaction requirements (status-based actions, no email claims, the 14-day rule as a fictional assumption) and reviewed the implementation.", figmaAi: "–", claude: "Built the HTML/CSS/JavaScript prototype and ran the automated checks." },
 ];
 
 /* ------------------------------------------------------------------ Stages 01–03 */
@@ -288,7 +288,7 @@ export const decisions: Decision[] = [
   },
   {
     n: 3, topic: "Delete draft vs Cancel training", decision: "Modify",
-    problem: "Extra proposal by Claude, not one of Asya’s seven problems: draft rows offered “Cancel”, although a draft has no registrations.",
+    problem: "An additional proposal from Claude, outside my seven problems: draft rows offered “Cancel”, although a draft has no registrations.",
     proposal: "Rename the draft action to “Delete draft” (flagged as needing product confirmation).",
     reasoning: "I agree that deleting a draft and cancelling an existing training are different actions. Drafts should use Delete draft with a separate confirmation dialog. Published and registration-open trainings should use Cancel training when cancellation is permitted.",
     implementation: "Drafts: View · Edit · Delete draft with its own dialog (“Keep draft” focused first). Cancel training only for Published and Registration open. New frame Refined 6.",
@@ -330,8 +330,11 @@ export const decisions: Decision[] = [
   },
 ];
 
+/** Decisions shown up front in Stage 04 – their effect is visible in the before/after screenshots. */
+export const keyDecisionNumbers = [1, 3, 6];
+
 export const conditionalApproval =
-  "Asya conditionally approved the refined screens and asked for five refinements. After they were implemented, she approved the overall design direction.";
+  "I conditionally approved the refined screens and asked for five refinements. Once they were implemented, I approved the overall design direction.";
 
 export const refinements = [
   { title: "Realistic TrainingCard masters", detail: "Each variant master shows content that fits its state, e.g. Draft “0 / 16 · Not yet published”." },
@@ -437,7 +440,7 @@ export const prototypeFacts = [
   "One self-contained HTML file: CSS custom properties and vanilla JavaScript",
   "14 fictional trainings stored in the page – no backend, storage, network calls or emails",
   "Layouts at 1440, 768 and 390px (CSS changes at 1024, 900 and 600px)",
-  "Built with Claude – not with Figma Make; Asya did not hand-code it",
+  "Implemented with Claude from my product rules and interaction requirements – not with Figma Make",
 ];
 
 export const thingsToTry = [
