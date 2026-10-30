@@ -8,11 +8,13 @@ import { useHref } from "@/lib/paths";
 
 const catLabel = (id: string) => categories.find((c) => c.id === id)?.label ?? id;
 
-export default function ProjectCard({ project, index, variant = "standard" }: { project: Project; index: number; variant?: "wide" | "tall" | "standard" }) {
+export default function ProjectCard({ project, index, variant = "standard", highlights = false }: { project: Project; index: number; variant?: "wide" | "tall" | "standard"; highlights?: boolean }) {
   const href = useHref();
   const p = project;
   const cover = p.shots[0];
   const num = String(index + 1).padStart(2, "0");
+  const chips = highlights && p.highlights ? p.highlights : p.stack;
+  const max = highlights && p.highlights ? chips.length : variant === "wide" ? 7 : 5;
 
   return (
     <article className={clsx("group relative", variant === "wide" && "lg:grid lg:grid-cols-12 lg:items-end lg:gap-10")}>
@@ -74,11 +76,11 @@ export default function ProjectCard({ project, index, variant = "standard" }: { 
           </p>
         )}
         <p className="mt-3 text-sm"><span className="font-semibold">Role – </span><span className="text-ink-soft">{p.role}</span></p>
-        <ul className="mt-4 flex flex-wrap gap-1.5" aria-label="Tech stack">
-          {p.stack.slice(0, variant === "wide" ? 7 : 5).map((s) => (
+        <ul className="mt-4 flex flex-wrap gap-1.5" aria-label={chips === p.stack ? "Tech stack" : "Focus areas"}>
+          {chips.slice(0, max).map((s) => (
             <li key={s} className="rounded-full border border-ink/12 bg-paper px-2.5 py-1 font-mono text-[11px] text-ink-soft">{s}</li>
           ))}
-          {p.stack.length > (variant === "wide" ? 7 : 5) && <li className="px-1 py-1 font-mono text-[11px] text-ink-soft">+{p.stack.length - (variant === "wide" ? 7 : 5)}</li>}
+          {chips.length > max && <li className="px-1 py-1 font-mono text-[11px] text-ink-soft">+{chips.length - max}</li>}
         </ul>
       </div>
     </article>

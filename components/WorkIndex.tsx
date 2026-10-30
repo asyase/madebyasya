@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import FilterBar, { type Filter } from "./FilterBar";
 import ProjectCard from "./ProjectCard";
+import FeaturedDesignSystems from "./FeaturedDesignSystems";
 import { categories, projects, type Category } from "@/lib/content/projects";
 
 const valid = categories.map((c) => c.hash);
@@ -15,10 +16,16 @@ export default function WorkIndex() {
     const read = () => {
       const h = window.location.hash.replace("#", "");
       if (valid.includes(h)) setFilter(h as Filter);
+      return valid.includes(h) && h !== "all";
     };
-    read();
+    // A filter link (e.g. /work/#design) opens at the filtered grid, below the featured section.
+    // Deferred so it runs after the router's own initial hash scroll.
+    const t = read() ? setTimeout(() => document.getElementById("all-projects")?.scrollIntoView(), 0) : undefined;
     window.addEventListener("hashchange", read);
-    return () => window.removeEventListener("hashchange", read);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("hashchange", read);
+    };
   }, []);
 
   function change(f: Filter) {
@@ -39,15 +46,19 @@ export default function WorkIndex() {
           <p className="mt-8 max-w-[56ch] text-lg text-ink-soft">
             Commercial features, full-stack systems, research-led design and AI experiments. Each case study shows the real status – what is implemented, prototyped or still planned.
           </p>
-          <div className="mt-10">
-            <FilterBar id="index" value={filter} onChange={change} pool={projects} />
-          </div>
         </div>
       </section>
 
-      <section className="pb-20" aria-labelledby="projects-heading">
+      <FeaturedDesignSystems />
+
+      <section id="all-projects" className="scroll-mt-20 pb-20 pt-16 md:pt-24" aria-labelledby="projects-heading">
         <div className="frame">
-          <h2 id="projects-heading" className="sr-only">Projects</h2>
+          <h2 id="projects-heading" className="font-display text-[clamp(2rem,4vw,3.25rem)] font-extrabold leading-none tracking-tightest">
+            All {projects.length} projects
+          </h2>
+          <div className="mb-12 mt-8">
+            <FilterBar id="index" value={filter} onChange={change} pool={projects} />
+          </div>
           <motion.div layout className="grid gap-x-8 gap-y-14 md:grid-cols-2 lg:grid-cols-3">
             <AnimatePresence mode="popLayout">
               {list.map((p, i) => (

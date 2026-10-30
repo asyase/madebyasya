@@ -65,6 +65,8 @@ export type Project = {
   awards?: string[];
   honors?: string[]; // e.g. thesis grade; shown like awards
   featured?: boolean;
+  /** Focus areas shown instead of the stack where a card is featured as design system work. */
+  highlights?: string[];
   accent: "pink" | "lavender" | "rose" | "peri";
   // Case study sections (all optional; the template hides what is missing)
   problem?: string;
@@ -1015,6 +1017,7 @@ public String requireSafe(String sql) {
     summary:
       "An exploratory design system demonstrating how reusable UI components, semantic design tokens, accessibility standards and structured documentation can support consistent multibrand experiences and AI-assisted interface development.",
     stack: ["React 19", "TypeScript", "Next.js", "CSS custom properties", "Design tokens (DTCG format)", "WCAG 2.2", "JSON component contracts"],
+    highlights: ["Multibrand architecture", "Design tokens", "Reusable components", "AI-readable contracts"],
     accent: "lavender",
     demo: { label: "Open the interactive demo", href: "/design-system/" },
     chapters: [
@@ -1172,6 +1175,7 @@ public String requireSafe(String sql) {
     summary:
       "Transforming fragmented interfaces into a scalable, accessible design system – an audit, component consolidation and an interactive before/after comparison for a fictional training management platform.",
     stack: ["UI audit", "WCAG 2.2", "Design tokens", "React 19", "TypeScript", "CSS custom properties", "Component documentation"],
+    highlights: ["UX/UI audit", "Component consolidation", "Accessibility", "Documentation and governance"],
     accent: "peri",
     chapters: [
       {
@@ -1305,6 +1309,7 @@ public String requireSafe(String sql) {
     summary:
       "A designer-led experiment: I used three Figma AI generations of the same screen to test how far AI-generated UI gets – then directed the refinement, a component library, design variables and an interactive prototype.",
     stack: ["Figma AI", "Figma", "Figma Variables", "Claude", "HTML/CSS/JS prototype", "Playwright + axe-core"],
+    highlights: ["Figma AI", "Prompt engineering", "Human UX decisions", "Figma Components and Variables", "Interactive prototype"],
     accent: "rose",
     chapters: [
       { key: "overview", title: "Project overview", lead: "I led the design process. AI supported the execution.", widget: "pp-overview" },
@@ -1358,6 +1363,14 @@ for (const p of projects) {
 const serverOnlyUnpublished: Project[] = typeof window === "undefined" && !SHOW_UNPUBLISHED ? unpublishedProjects : [];
 export const getProject = (slug: string) => projects.find((p) => p.slug === slug) ?? serverOnlyUnpublished.find((p) => p.slug === slug);
 export const featuredProjects = projects.filter((p) => p.featured);
+
+const bySlug = (slugs: string[]) => slugs.map((s) => projects.find((p) => p.slug === s)).filter((p): p is Project => !!p);
+
+// Work page: design system case studies shown above the full index (the first one as the large card).
+export const designSystemProjects = bySlug(["ai-ready-design-system", "from-chaos-to-consistency", "from-prompt-to-product"]);
+
+// Home page "Selected work": shown first, in this order; the rest follow in index order.
+export const homeSelection = bySlug(["ai-ready-design-system", "from-chaos-to-consistency", "from-prompt-to-product", "ai-meal-planner", "ai-website-builder", "telia-ux-audit"]);
 
 export const toneLabel: Record<StatusTone, string> = {
   done: "Completed",
