@@ -1,0 +1,11 @@
+# Not needed to build the site – not uploaded to Vercel.
+/Claude outputs/
+*.zip
+/docs/from-prompt-to-product/
+# Original PNG exports: kept in git as source material; the site uses the WebP copies in public/.
+/design-source/
+
+# Superseded first-round From Prompt to Product files – never publish.
+/public/work/from-prompt-to-product/figma/
+/public/work/from-prompt-to-product/code/
+/public/work/from-prompt-to-product/prototype/

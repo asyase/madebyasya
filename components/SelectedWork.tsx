@@ -4,11 +4,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import FilterBar, { type Filter } from "./FilterBar";
 import ProjectCard from "./ProjectCard";
-import { projects } from "@/lib/content/projects";
+import { homeSelection, projects } from "@/lib/content/projects";
 import { useHref } from "@/lib/paths";
 
-// Featured projects first, then the rest, so every filter still shows a full layout.
-const ordered = [...projects.filter((p) => p.featured), ...projects.filter((p) => !p.featured)];
+// Home selection first, then the rest, so every filter still shows a full layout.
+const ordered = [...homeSelection, ...projects.filter((p) => !homeSelection.includes(p))];
 const LIMIT = 6;
 
 // Layout rhythm: wide, then a tall/standard pair, repeated.

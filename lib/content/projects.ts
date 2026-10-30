@@ -4,6 +4,9 @@
 // Images are served from Anastasija's existing portfolios. To self-host them,
 // download each file into /public/work/<slug>/ and change the `src` values.
 
+import { SHOW_UNPUBLISHED } from "./publication";
+import { unpublishedProjects } from "./unpublished-projects";
+
 export type Category = "fullstack" | "design" | "ai";
 
 export const categories: { id: Category | "all"; label: string; hash: string }[] = [
@@ -27,6 +30,27 @@ export type ArchNode = {
 export type Shot = { src: string; alt: string; caption?: string };
 export type Feature = { label: string; state: "done" | "proto" | "planned" };
 
+/** Interactive widgets a case study can embed (see components/ds-showcase/widgets.tsx). */
+export type WidgetId =
+  | "ds-tokens" | "ds-multibrand" | "ds-composer" | "ds-playground" | "ds-implementation"
+  | "cc-audit" | "cc-consolidation" | "cc-before-after" | "cc-a11y" | "cc-docs" | "cc-implementation" | "cc-outcomes"
+  | "pp-overview" | "pp-roles" | "pp-generations" | "pp-refinement" | "pp-components" | "pp-variables" | "pp-prototype" | "pp-testing" | "pp-ai-decide" | "pp-lessons" | "pp-outcome";
+
+/** A custom numbered chapter. When a project has chapters, they replace the default sections. */
+export type Chapter = {
+  key: string;
+  title: string;
+  lead?: string;
+  body?: string[];
+  bullets?: string[];
+  widget?: WidgetId;
+  /** Clearly labelled box, e.g. for conceptual or not-yet-built parts. */
+  callout?: { label: string; title: string; items: string[]; placement?: "before" | "after" };
+  columns?: { title: string; items: string[] }[];
+  features?: Feature[];
+  lessons?: string[];
+};
+
 export type Project = {
   slug: string;
   title: string;
@@ -41,6 +65,8 @@ export type Project = {
   awards?: string[];
   honors?: string[]; // e.g. thesis grade; shown like awards
   featured?: boolean;
+  /** Focus areas shown instead of the stack where a card is featured as design system work. */
+  highlights?: string[];
   accent: "pink" | "lavender" | "rose" | "peri";
   // Case study sections (all optional; the template hides what is missing)
   problem?: string;
@@ -55,6 +81,9 @@ export type Project = {
   lessons?: string[];
   numbers?: { value: string; label: string }[];
   code?: { file: string; lang: string; body: string; note: string };
+  chapters?: Chapter[];
+  /** Internal interactive demo, linked from the case study header. */
+  demo?: { label: string; href: string };
   shots: Shot[];
   cover?: string; // self-hosted card cover (top of the first screenshot)
   /** Label shown on gallery cards. Only meaningful distinctions; the full status stays on the case study. */
@@ -976,11 +1005,335 @@ public String requireSafe(String sql) {
     shots: [{ src: `${OLD}/p13.png`, alt: "Bicycle store design", caption: "Store design" }],
     links: [{ label: "Figma file", href: "https://www.figma.com/file/Atq6j1kUXVbvHmXK3AujME/bicycles-e-commerce" }],
   },
+  // Published 2026: appended at the end (30–32) so the numbers of projects 01–29 stay the same.
+  {
+    slug: "ai-ready-design-system",
+    title: "AI-Ready Multibrand Design System",
+    kicker: "Design system · Interactive prototype",
+    status: { label: "Independent concept · Interactive prototype", tone: "proto" },
+    categories: ["design", "fullstack", "ai"],
+    role: "Design System Designer · UX/UI · Frontend Developer",
+    context: "Independent concept and interactive technical prototype",
+    summary:
+      "An exploratory design system demonstrating how reusable UI components, semantic design tokens, accessibility standards and structured documentation can support consistent multibrand experiences and AI-assisted interface development.",
+    stack: ["React 19", "TypeScript", "Next.js", "CSS custom properties", "Design tokens (DTCG format)", "WCAG 2.2", "JSON component contracts"],
+    highlights: ["Multibrand architecture", "Design tokens", "Reusable components", "AI-readable contracts"],
+    accent: "lavender",
+    demo: { label: "Open the interactive demo", href: "/design-system/" },
+    chapters: [
+      {
+        key: "challenge",
+        title: "Challenge",
+        lead:
+          "When several products and brands are built by different teams, the same button is rebuilt again and again – each time with slightly different colours, spacing, states and accessibility. AI coding tools make this faster, not better: without clear rules, a model invents its own components and hard-codes values.",
+        bullets: [
+          "How can one component library serve brands with very different visual identities?",
+          "How can accessibility be built in once, instead of re-checked in every product?",
+          "What does a design system need so that an AI tool can use it correctly and predictably?",
+        ],
+      },
+      {
+        key: "approach",
+        title: "Approach",
+        bullets: [
+          "Semantic design tokens in three levels, so brands differ only in values – never in components.",
+          "A small set of reusable React components whose props form a written contract.",
+          "Accessibility inside the components: native elements, visible focus, labelled fields and accessible error handling.",
+          "Machine-readable component contracts as the single source for documentation, validation and AI-assisted composition.",
+          "A working prototype rather than mockups: every claim on this page can be tried in the browser.",
+        ],
+      },
+      {
+        key: "architecture",
+        title: "Design system architecture",
+        lead: "Tokens are organised in three levels. Each level may only reference the level below it, so every value has one clear owner.",
+        body: [
+          "Primitive tokens hold raw values – colour ramps, a spacing scale, type sizes, radii and shadows. Semantic tokens give those values a meaning, such as color.action.primary or spacing.component.md, and each brand defines its own set. Component tokens such as button.primary.background or input.border.focus say where a value is used; they are shared by every brand and only point at semantic tokens.",
+          "Follow a component token below to see its full alias chain, and how the same token resolves differently for each brand.",
+        ],
+        widget: "ds-tokens",
+      },
+      {
+        key: "multibrand",
+        title: "Multibrand experience",
+        lead: "Three fictional brands – an online academy, a utility company and a dark-themed retailer – share one component library. Only their semantic tokens differ.",
+        body: [
+          "Switching brands changes colours, heading typography, corner radius, control height and elevation. The component tree, HTML, keyboard behaviour, validation and contracts stay identical.",
+          "This is how the architecture scales: adding a brand means writing one semantic token set of about 60 values. A new product adds no new components – it picks a brand and reuses the library, and every fix to a component reaches all brands at once.",
+        ],
+        widget: "ds-multibrand",
+      },
+      {
+        key: "ai-ready",
+        title: "AI-ready design",
+        lead: "A design system becomes usable by AI when its rules are written down as data, not only as pictures and prose.",
+        body: [
+          "Each component has a contract: its purpose, allowed props and values, interaction states, accessibility requirements, usage guidance and composition rules. The contracts are published as JSON, and the same data renders the documentation, so docs and machine rules cannot drift apart.",
+          "In an AI workflow, a model receives the contracts and a request, and is asked for a structured UI definition instead of free code. A validator checks the output before anything renders: unknown components, unsupported variants, raw colours or pixel values, missing labels and broken composition rules are rejected with a clear reason.",
+        ],
+        callout: {
+          label: "Deterministic demo",
+          title: "No AI model is called in this prototype",
+          placement: "before",
+          items: [
+            "The composer loads the structured output a model would be asked to return for each scenario.",
+            "Validation, brand theming and rendering are real and run in the browser – edit the JSON to see them react.",
+            "The site is a static export with no server, so a live model call would need a separate, secured API. That is a deliberate next step, not part of this prototype.",
+          ],
+        },
+        widget: "ds-composer",
+      },
+      {
+        key: "playground",
+        title: "Interactive playground",
+        lead: "Explore every component with its variants, sizes and states, in all three brands and at different widths. The code updates with each change.",
+        widget: "ds-playground",
+      },
+      {
+        key: "implementation",
+        title: "Implementation",
+        bullets: [
+          "Tokens are defined once in TypeScript and generated into a single stylesheet in which each level points at the one below with var(), plus a DTCG-style tokens.json.",
+          "Components contain no raw colours, spacing or radii – only component tokens. Hover, focus, disabled and error states are styled the same way.",
+          "Component props mirror the JSON contracts one-to-one, so a validated definition renders without a translation layer.",
+          "Forms use native constraint validation with an accessible error summary, aria-describedby messages and re-checking as fields are corrected.",
+          "The dialog is a native <dialog> with showModal(), so focus trapping, Esc and an inert background come from the browser.",
+          "Contrast ratios are calculated from the tokens with the WCAG formula and checked live when a token is edited.",
+        ],
+        widget: "ds-implementation",
+        callout: {
+          label: "Not built yet",
+          title: "How this would connect to Figma",
+          items: [
+            "Primitive tokens → a Figma Variables collection; semantic tokens → a second collection with one mode per brand.",
+            "Component contracts → Figma components whose variant properties use the same names and values (variant, size, state).",
+            "A published library per brand mode, with token changes synced from tokens.json in both directions.",
+            "No Figma library exists for this project today – this is the planned next step.",
+          ],
+        },
+      },
+      {
+        key: "outcome",
+        title: "Outcome & learnings",
+        lead: "A working prototype that shows the full path from a token to a rendered, accessible, brand-specific interface – and how the same structure lets an AI tool compose interfaces that stay inside the system.",
+        features: [
+          { label: "Three-level token system with three fictional brands", state: "done" },
+          { label: "12 components with variants, sizes and states", state: "done" },
+          { label: "Interactive playground with generated code", state: "done" },
+          { label: "Machine-readable contracts and tokens as JSON", state: "done" },
+          { label: "Validator for AI-style structured UI output", state: "done" },
+          { label: "Schema-driven composer (deterministic, no model)", state: "proto" },
+          { label: "Live contrast checks calculated from tokens", state: "done" },
+          { label: "Live LLM composition through a secured API", state: "planned" },
+          { label: "Figma Variables and component library", state: "planned" },
+          { label: "Automated visual and accessibility tests", state: "planned" },
+        ],
+        columns: [
+          {
+            title: "Limitations",
+            items: [
+              "An independent concept – not used by a real organisation or tested with users.",
+              "A small library: no tabs, radio groups, combobox, table or navigation yet.",
+              "Contrast is calculated automatically and keyboard use was checked by hand; there is no automated accessibility suite or screen-reader testing yet.",
+            ],
+          },
+          {
+            title: "Next steps",
+            items: [
+              "Connect a model through a server-side API and measure how often its first output passes validation.",
+              "Mirror tokens and components in Figma Variables and a published library.",
+              "Add visual regression and automated accessibility tests per brand.",
+            ],
+          },
+        ],
+        lessons: [
+          "Naming is the architecture: semantic tokens decide what a brand can change.",
+          "A contract that renders the docs is a contract that stays true.",
+          "AI works best when it chooses from a system instead of inventing one.",
+        ],
+      },
+    ],
+    shots: [
+      { src: "/work/ai-ready-design-system/playground.webp", alt: "Component playground with a button, its properties and the tokens it uses", caption: "Component playground" },
+      { src: "/work/ai-ready-design-system/composer.webp", alt: "AI-ready composer showing a request, a JSON UI definition and the rendered form", caption: "AI-ready composer" },
+      { src: "/work/ai-ready-design-system/multibrand.webp", alt: "The same interface rendered in three fictional brands", caption: "One library, three brands" },
+    ],
+    links: [
+      { label: "Open the interactive demo", href: "/design-system/" },
+      { label: "Component contracts (JSON)", href: "/design-system/contracts.json" },
+      { label: "Design tokens (JSON)", href: "/design-system/tokens.json" },
+    ],
+  },
+  {
+    slug: "from-chaos-to-consistency",
+    title: "From Chaos to Consistency",
+    kicker: "UX/UI audit · Design system · Interactive prototype",
+    status: { label: "Independent concept · Functional prototype", tone: "proto" },
+    categories: ["design", "fullstack"],
+    role: "UX/UI Designer · Design System Designer · Frontend Developer",
+    context: "Independent design exploration inspired by training management workflows. The platform, data and Before screens are fictional.",
+    summary:
+      "Transforming fragmented interfaces into a scalable, accessible design system – an audit, component consolidation and an interactive before/after comparison for a fictional training management platform.",
+    stack: ["UI audit", "WCAG 2.2", "Design tokens", "React 19", "TypeScript", "CSS custom properties", "Component documentation"],
+    highlights: ["UX/UI audit", "Component consolidation", "Accessibility", "Documentation and governance"],
+    accent: "peri",
+    chapters: [
+      {
+        key: "context",
+        title: "Context",
+        lead: "Business applications grow screen by screen. Each new feature solves its own problem, and over time the same action, field or status ends up looking and behaving differently depending on where you meet it.",
+        body: [
+          "The fictional platform in this case study, Kursion, manages training courses, schedules, registrations, participants and certificates. Five roles use it every day – sales representatives, training managers, content creators, lecturers and administrators – often under time pressure and across many screens.",
+          "In this kind of tool, consistency is not decoration. When the same thing always looks the same, people stop decoding the interface and focus on the task – and every inconsistency becomes a small, repeated cost.",
+        ],
+        callout: {
+          label: "About this project",
+          title: "An independent concept, not a client project",
+          items: [
+            "Inspired by my experience with complex business applications and training management workflows.",
+            "Kursion, its screens and all data are fictional. No company screenshots, internal information or real people are used.",
+            "The Before screens are an illustrative baseline I built for this case study; nothing here was commissioned or adopted by an organisation.",
+          ],
+        },
+      },
+      {
+        key: "challenge",
+        title: "The challenge",
+        lead: "Different parts of the application used different components, interaction patterns, spacing, colours and form behaviour for the same jobs.",
+        bullets: [
+          "Four visual styles for the main action – a green button, a blue button, an outlined pill and a text link.",
+          "Three form field patterns, including placeholder-only labels.",
+          "Ten names in two vocabularies for five training statuses, with colours that contradict each other.",
+          "Generic error banners instead of explaining what to fix.",
+          "Missing focus indicators and contrast that fails WCAG.",
+        ],
+        body: ["The goal: analyse these inconsistencies, prioritise them, and show a more coherent, reusable and accessible interface system – on the same data and with the same functionality."],
+      },
+      {
+        key: "audit",
+        title: "UI audit",
+        lead: "I reviewed the three core screens – dashboard, registration form and training list – against usability heuristics and WCAG 2.2, and grouped every issue by the pattern it belongs to.",
+        body: ["Each finding records its UX impact, accessibility impact, severity and the shared component or token set that resolves it. Open a finding to see the details."],
+        widget: "cc-audit",
+      },
+      {
+        key: "principles",
+        title: "Design principles",
+        columns: [
+          { title: "Consistency", items: ["One component per job, one name per concept.", "Identical actions look and behave identically on every screen."] },
+          { title: "Clarity", items: ["One primary action per view.", "Hierarchy follows the task, not the order things were built in."] },
+          { title: "Accessibility", items: ["Built into components, not added per screen.", "Meaning never depends on colour alone."] },
+          { title: "Reusability & scalability", items: ["Variants instead of new components.", "Semantic tokens, so a change happens in one place."] },
+        ],
+      },
+      {
+        key: "consolidation",
+        title: "Component consolidation",
+        lead: "From duplication to reusability: separately styled elements become one component with clearly defined variants and states.",
+        widget: "cc-consolidation",
+      },
+      {
+        key: "before-after",
+        title: "Before / After",
+        lead: "The same three screens, the same fictional data and the same functionality – first as a fragmented interface, then rebuilt with the unified design system.",
+        body: ["Switch between the versions or view them side by side. Both are interactive: filter and sort the list, submit the form empty, cancel a training. The numbered annotations explain why each change improves usability."],
+        widget: "cc-before-after",
+      },
+      {
+        key: "accessibility",
+        title: "Accessibility",
+        lead: "Accessibility moved from something each screen had to get right into something the components guarantee.",
+        widget: "cc-a11y",
+      },
+      {
+        key: "governance",
+        title: "Documentation & governance",
+        lead: "A design system is more than a set of components. It needs documentation people trust, and a process that decides how components are added, changed and retired.",
+        body: ["The documentation example below covers purpose, usage, variants, accessibility, do / don’t and implementation. The governance part shows an illustrative model for ownership, naming, versioning and the component lifecycle."],
+        widget: "cc-docs",
+      },
+      {
+        key: "implementation",
+        title: "Implementation",
+        bullets: [
+          "Kursion UI is built with React and TypeScript inside this portfolio – the same components render the After screens, the documentation and the consolidation demo.",
+          "Tokens are defined once in TypeScript and generated into one stylesheet in which component tokens point at semantic tokens, and semantic tokens at primitives.",
+          "Status is modelled as data: a fixed vocabulary plus semantic colour tokens. Adding a state is one entry and two tokens, not a new style.",
+          "Native elements carry the behaviour: button, select, dialog, table. ARIA is added only where it adds meaning – aria-sort, aria-invalid, aria-describedby, live regions.",
+          "The embedded app uses container queries, so it adapts to the space it is given – full width, side by side or on a phone.",
+        ],
+        widget: "cc-implementation",
+      },
+      {
+        key: "outcomes",
+        title: "Outcomes & learnings",
+        lead: "The working prototype shows the whole path from an audit to a documented, accessible component system, and lets anyone compare the result on identical content.",
+        widget: "cc-outcomes",
+        features: [
+          { label: "Illustrative Before screens: dashboard, form, list", state: "done" },
+          { label: "UI audit with 9 findings, severity and WCAG references", state: "done" },
+          { label: "Kursion UI: 11 components with variants and states", state: "done" },
+          { label: "Interactive Before / After with annotations", state: "done" },
+          { label: "Contrast comparison calculated from tokens", state: "done" },
+          { label: "Documentation and illustrative governance model", state: "done" },
+          { label: "Usability testing with real users", state: "planned" },
+          { label: "Screen-reader and automated accessibility testing", state: "planned" },
+          { label: "Figma library mirroring the components and tokens", state: "planned" },
+        ],
+        columns: [
+          { title: "Limitations", items: ["The Before interface is illustrative, so the audit shows method rather than findings about a real product.", "No user research or usability testing has been done – the reasoning is based on heuristics and WCAG.", "Keyboard use was checked by hand; screen readers and automated audits are not yet covered."] },
+          { title: "Next steps", items: ["Test the dashboard and form with training managers and measure task time and errors.", "Build the matching Figma library with Variables and Variants.", "Add axe checks and visual regression tests per component."] },
+        ],
+        lessons: [
+          "Most inconsistency is duplication that nobody decided on.",
+          "A fixed vocabulary does as much for consistency as a colour palette.",
+          "When accessibility lives in the component, every screen inherits it.",
+        ],
+      },
+    ],
+    shots: [
+      { src: "/work/from-chaos-to-consistency/before-after.webp", alt: "Training list shown side by side: the fragmented Before version and the unified After version", caption: "Before / After – training list" },
+      { src: "/work/from-chaos-to-consistency/audit.webp", alt: "UI audit with severity summary and an expanded finding", caption: "UI audit" },
+      { src: "/work/from-chaos-to-consistency/consolidation.webp", alt: "Four legacy button styles consolidated into one Button component", caption: "From duplication to reusability" },
+    ],
+    links: [],
+  },
+  {
+    slug: "from-prompt-to-product",
+    title: "From Prompt to Product",
+    kicker: "AI-assisted UX/UI design · Interactive prototype",
+    status: { label: "Independent exploration · Interactive prototype", tone: "proto" },
+    categories: ["design", "ai"],
+    role: "UX/UI Designer – led the experiment, evaluation and design decisions; directed the AI-assisted implementation",
+    context: "Independent exploration with Figma AI and Claude for Kursion, a fictional training management platform. All data is fictional.",
+    summary:
+      "A designer-led experiment: I used three Figma AI generations of the same screen to test how far AI-generated UI gets – then directed the refinement, a component library, design variables and an interactive prototype.",
+    stack: ["Figma AI", "Figma", "Figma Variables", "Claude", "HTML/CSS/JS prototype", "Playwright + axe-core"],
+    highlights: ["Figma AI", "Prompt engineering", "Human UX decisions", "Figma Components and Variables", "Interactive prototype"],
+    accent: "rose",
+    chapters: [
+      { key: "overview", title: "Project overview", lead: "I led the design process. AI supported the execution.", widget: "pp-overview" },
+      { key: "roles", title: "How I worked with AI", lead: "My responsibilities at each stage, and where AI assisted.", widget: "pp-roles" },
+      { key: "stages-01-03", title: "Stages 01–03: prompt evolution", lead: "The same screen, three prompts with increasing guidance. Each prompt is shown exactly as used, above its unedited result.", widget: "pp-generations" },
+      { key: "human-refinement", title: "Stage 04 – Human Refinement: My UX Decisions", lead: "I evaluated Stage 03, defined seven UX problems and made eight documented decisions. Each one shaped the final interface.", widget: "pp-refinement" },
+      { key: "components", title: "Stage 05 – Component library", lead: "A Figma component library built with Claude from my design decisions: 11 components with 52 variants, Auto Layout and variable bindings – reviewed by me, including the TrainingCard trade-off I approved.", widget: "pp-components" },
+      { key: "variables", title: "Stage 06 – Design variables", lead: "I required every value to follow the semantic token structure; Claude built the 149 variables in three layers: primitive → semantic → component.", widget: "pp-variables" },
+      { key: "prototype", title: "Stage 07 – Interactive prototype", lead: "The refined design as a working HTML prototype. I defined the product rules and interaction requirements; Claude implemented them in HTML, CSS and JavaScript, and I reviewed the implementation.", widget: "pp-prototype" },
+      { key: "testing", title: "Accessibility and automated testing", lead: "What was designed in, what was checked automatically – and what wasn’t done.", widget: "pp-testing" },
+      { key: "ai-couldnt-decide", title: "Decisions AI Couldn’t Make for Me", lead: "Where the AI output left a gap, and the decision I made.", widget: "pp-ai-decide" },
+      { key: "lessons", title: "Limitations and lessons learned", widget: "pp-lessons" },
+      { key: "outcome", title: "Final outcome", widget: "pp-outcome" },
+    ],
+    shots: [{ src: "/work/from-prompt-to-product/kursion/04/figma-2x/stage04-refined-1-default@2x.webp", alt: "Refined Kursion Trainings screen: actionable warning, status filters and status-specific row actions", caption: "Stage 04 – Refined 1" }],
+    links: [],
+  },
+  // Case studies that are not published yet: listed only in development / local preview (see lib/content/publication.ts).
+  ...(SHOW_UNPUBLISHED ? unpublishedProjects : []),
 ];
 
 // Card covers are self-hosted copies of the top of each project's first screenshot,
 // so the gallery doesn't depend on other sites being reachable.
-const LOCAL_COVERS = ["accounting-modernization", "electricity-einvoicing", "ecommerce-backend", "ferry-booking", "ai-meal-planner", "ai-website-builder", "liftertrans", "content-factory", "telia-ux-audit", "modular-furniture-store", "home-cafe-pos", "stiilihub", "telegram-life-assistant", "n8n-automations", "laboulangerie", "ai-creative-design", "pos-promo-site", "telia-tv-discovery", "dailytrack", "pomodoro", "fitness-coaching", "birthday-reminder", "flashcards", "abacus-kids", "transfer-company", "vet-clinic", "book-eshop", "jewellery-site", "bicycle-store-design"];
+const LOCAL_COVERS = ["accounting-modernization", "electricity-einvoicing", "ecommerce-backend", "ferry-booking", "ai-meal-planner", "ai-website-builder", "liftertrans", "content-factory", "telia-ux-audit", "modular-furniture-store", "home-cafe-pos", "stiilihub", "telegram-life-assistant", "n8n-automations", "laboulangerie", "ai-creative-design", "pos-promo-site", "telia-tv-discovery", "dailytrack", "pomodoro", "fitness-coaching", "birthday-reminder", "flashcards", "abacus-kids", "transfer-company", "vet-clinic", "book-eshop", "jewellery-site", "bicycle-store-design", "ai-ready-design-system", "from-chaos-to-consistency", "from-prompt-to-product"];
 for (const p of projects) if (LOCAL_COVERS.includes(p.slug)) p.cover = `/work/${p.slug}/cover.webp`;
 
 // Gallery cards show a badge only where it changes how the work should be read:
@@ -995,14 +1348,29 @@ const CARD_BADGES: Record<string, Status> = {
   "laboulangerie": { label: "Commercial", tone: "shipped" },
   "pos-promo-site": { label: "Commercial", tone: "shipped" },
   "liftertrans": { label: "AI chat prototype", tone: "proto" },
+  "ai-ready-design-system": { label: "Interactive prototype", tone: "proto" },
+  "from-chaos-to-consistency": { label: "Interactive prototype", tone: "proto" },
+  "from-prompt-to-product": { label: "Interactive prototype", tone: "proto" },
 };
 for (const p of projects) {
   if (CARD_BADGES[p.slug]) p.cardBadge = CARD_BADGES[p.slug];
   else if (p.status.tone === "concept") p.cardBadge = { label: "Concept", tone: "concept" };
 }
 
-export const getProject = (slug: string) => projects.find((p) => p.slug === slug);
+// Server-side rendering can still resolve unpublished entries, so their own routes build
+// (and are then removed from the output by scripts/prune-unpublished.mjs). In browser bundles
+// `typeof window` is "object", so this list - and the unpublished text - is dropped.
+const serverOnlyUnpublished: Project[] = typeof window === "undefined" && !SHOW_UNPUBLISHED ? unpublishedProjects : [];
+export const getProject = (slug: string) => projects.find((p) => p.slug === slug) ?? serverOnlyUnpublished.find((p) => p.slug === slug);
 export const featuredProjects = projects.filter((p) => p.featured);
+
+const bySlug = (slugs: string[]) => slugs.map((s) => projects.find((p) => p.slug === s)).filter((p): p is Project => !!p);
+
+// Work page: design system case studies shown above the full index (the first one as the large card).
+export const designSystemProjects = bySlug(["ai-ready-design-system", "from-chaos-to-consistency", "from-prompt-to-product"]);
+
+// Home page "Selected work": shown first, in this order; the rest follow in index order.
+export const homeSelection = bySlug(["ai-ready-design-system", "from-chaos-to-consistency", "from-prompt-to-product", "ai-meal-planner", "ai-website-builder", "telia-ux-audit"]);
 
 export const toneLabel: Record<StatusTone, string> = {
   done: "Completed",

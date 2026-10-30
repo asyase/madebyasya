@@ -7,7 +7,9 @@ import Gallery from "./Gallery";
 import ArchitectureExplorer from "./ArchitectureExplorer";
 import Reveal from "./Reveal";
 import Starburst from "./Starburst";
-import { categories, projects, type Project } from "@/lib/content/projects";
+import { categories, projects, type Chapter, type Project, type WidgetId } from "@/lib/content/projects";
+
+type Widgets = Partial<Record<WidgetId, React.ComponentType>>;
 import { site } from "@/lib/content/site";
 import { useHref } from "@/lib/paths";
 
@@ -43,9 +45,81 @@ const featureIcon = {
 };
 const featureLabel = { done: "Implemented", proto: "Prototype", planned: "Planned" };
 
-export default function CaseStudy({ project: p }: { project: Project }) {
+function FeatureList({ features }: { features: NonNullable<Project["features"]> }) {
+  return (
+    <ul className="grid gap-x-8 sm:grid-cols-2">
+      {features.map((f) => (
+        <li key={f.label} className="flex items-start gap-3 border-b border-ink/10 py-3">
+          <span className="mt-1">{featureIcon[f.state]}</span>
+          <span className="flex-1">
+            {f.label}
+            <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.1em] text-ink-soft">{featureLabel[f.state]}</span>
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** A custom chapter: text first, then an optional interactive widget and a labelled callout. */
+function ChapterBody({ c, widgets }: { c: Chapter; widgets?: Widgets }) {
+  const Widget = c.widget ? widgets?.[c.widget] : null;
+  return (
+    <div className="grid grid-cols-1 gap-8">
+      {c.lead && <p className="max-w-[64ch] text-xl leading-relaxed md:text-2xl">{c.lead}</p>}
+      {c.body && (
+        <div className="grid max-w-[72ch] gap-4 text-lg leading-relaxed text-ink-soft">
+          {c.body.map((t) => <p key={t}>{t}</p>)}
+        </div>
+      )}
+      {c.bullets && <Bullets items={c.bullets} />}
+      {c.callout?.placement === "before" && <Callout callout={c.callout} />}
+      {Widget && <Widget />}
+      {c.callout && c.callout.placement !== "before" && <Callout callout={c.callout} />}
+      {c.features && <FeatureList features={c.features} />}
+      {c.columns && (
+        <div className="grid gap-4 md:grid-cols-2">
+          {c.columns.map((col) => (
+            <div key={col.title} className="rounded-2xl bg-ivory p-5">
+              <p className="eyebrow text-pink-deep">{col.title}</p>
+              <ul className="mt-3 grid gap-2">{col.items.map((t) => <li key={t} className="leading-relaxed">{t}</li>)}</ul>
+            </div>
+          ))}
+        </div>
+      )}
+      {c.lessons && (
+        <div>
+          <p className="eyebrow mb-3 text-ink-soft">Lessons</p>
+          <ul className="grid gap-2">
+            {c.lessons.map((l) => <li key={l} className="serif-accent text-2xl leading-snug md:text-3xl">“{l}”</li>)}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Callout({ callout }: { callout: NonNullable<Chapter["callout"]> }) {
+  return (
+    <aside className="rounded-[24px] border-2 border-dashed border-lav-deep/40 bg-paper p-5 sm:p-6">
+      <p className="eyebrow text-lav-deep">{callout.label}</p>
+      <p className="mt-1 font-display text-xl font-bold tracking-tight">{callout.title}</p>
+      <ul className="mt-3 grid gap-2">
+        {callout.items.map((t) => (
+          <li key={t} className="flex gap-3 leading-relaxed">
+            <CircleDashed className="mt-1 h-4 w-4 shrink-0 text-lav-deep" aria-hidden />
+            <span>{t}</span>
+          </li>
+        ))}
+      </ul>
+    </aside>
+  );
+}
+
+export default function CaseStudy({ project: p, widgets }: { project: Project; widgets?: Widgets }) {
   const href = useHref();
   const i = projects.findIndex((x) => x.slug === p.slug);
+  const listed = i >= 0; // drafts are not in the public list: no number, no prev/next
   const next = projects[(i + 1) % projects.length];
   const prev = projects[(i - 1 + projects.length) % projects.length];
 
@@ -56,23 +130,7 @@ export default function CaseStudy({ project: p }: { project: Project }) {
   if (p.approach) story.push({ key: "approach", title: "Approach", node: <Bullets items={p.approach} /> });
   if (p.design) story.push({ key: "design", title: "Design decisions", node: <Bullets items={p.design} /> });
   if (p.architecture) story.push({ key: "architecture", title: "Architecture", node: <ArchitectureExplorer nodes={p.architecture.nodes} caption={p.architecture.caption} /> });
-  if (p.features) story.push({
-    key: "features",
-    title: "Features",
-    node: (
-      <ul className="grid gap-x-8 sm:grid-cols-2">
-        {p.features.map((f) => (
-          <li key={f.label} className="flex items-start gap-3 border-b border-ink/10 py-3">
-            <span className="mt-1">{featureIcon[f.state]}</span>
-            <span className="flex-1">
-              {f.label}
-              <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.1em] text-ink-soft">{featureLabel[f.state]}</span>
-            </span>
-          </li>
-        ))}
-      </ul>
-    ),
-  });
+  if (p.features) story.push({ key: "features", title: "Features", node: <FeatureList features={p.features} /> });
   if (p.implementation || p.code) story.push({
     key: "implementation",
     title: "Implementation",
@@ -140,6 +198,8 @@ export default function CaseStudy({ project: p }: { project: Project }) {
     ),
   });
 
+  if (p.chapters) story.splice(0, story.length, ...p.chapters.map((c) => ({ key: c.key, title: c.title, node: <ChapterBody c={c} widgets={widgets} /> })));
+
   const cover = p.shots[0];
   const cats = p.categories.map((c) => categories.find((x) => x.id === c)?.label).join(" · ");
 
@@ -153,13 +213,21 @@ export default function CaseStudy({ project: p }: { project: Project }) {
             <ArrowLeft className="h-4 w-4" aria-hidden /> All work
           </a>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <span className="font-display text-5xl font-extrabold leading-none text-outline">{String(i + 1).padStart(2, "0")}</span>
+            <span className="font-display text-5xl font-extrabold leading-none text-outline">{listed ? String(i + 1).padStart(2, "0") : "Draft"}</span>
             <span className="sr-only">Project status:</span>
             <StatusPill status={p.status} />
             <span className="eyebrow text-ink-soft">{cats}</span>
           </div>
           <h1 className="mt-6 max-w-6xl font-display text-[clamp(2.6rem,7vw,6.8rem)] font-extrabold leading-[0.92] tracking-tightest">{p.title}</h1>
           <p className="mt-8 max-w-[58ch] text-xl leading-relaxed text-ink-soft md:text-2xl">{p.summary}</p>
+          {p.demo && (
+            <a href={href(p.demo.href)} className="group mt-8 inline-flex items-center gap-3 rounded-full bg-ink py-3 pl-6 pr-3 font-semibold text-paper" data-cursor="Open demo">
+              {p.demo.label}
+              <span className="grid h-9 w-9 place-items-center rounded-full bg-bubblegum text-ink transition-transform group-hover:translate-x-1">
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </span>
+            </a>
+          )}
 
           {p.honors && (
             <ul className="mt-8 flex flex-wrap gap-2">
@@ -237,9 +305,15 @@ export default function CaseStudy({ project: p }: { project: Project }) {
             <ul className="flex flex-wrap gap-3">
               {p.links.map((l) => (
                 <li key={l.href}>
-                  <a href={l.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 font-semibold text-paper hover:bg-pink-deep">
-                    {l.label} <ArrowUpRight className="h-4 w-4" aria-hidden />
-                  </a>
+                  {l.href.startsWith("/") ? (
+                    <a href={href(l.href)} className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 font-semibold text-paper hover:bg-pink-deep">
+                      {l.label} <ArrowRight className="h-4 w-4" aria-hidden />
+                    </a>
+                  ) : (
+                    <a href={l.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 font-semibold text-paper hover:bg-pink-deep">
+                      {l.label} <ArrowUpRight className="h-4 w-4" aria-hidden />
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -251,7 +325,7 @@ export default function CaseStudy({ project: p }: { project: Project }) {
       </div>
 
       {/* Next / previous */}
-      <nav aria-label="More projects" className="frame mt-10 grid gap-4 pb-24 md:grid-cols-2">
+      {listed && <nav aria-label="More projects" className="frame mt-10 grid gap-4 pb-24 md:grid-cols-2">
         {[{ dir: "Previous", p: prev }, { dir: "Next", p: next }].map(({ dir, p: q }) => (
           <a key={dir} href={href(`/work/${q.slug}/`)} className={clsx("group flex min-h-[200px] flex-col justify-between rounded-[24px] p-6 md:p-8", dir === "Next" ? "bg-ink text-paper" : "bg-ivory")} data-cursor={dir}>
             <span className={clsx("eyebrow flex items-center gap-2", dir === "Next" ? "text-bubblegum" : "text-pink-deep")}>
@@ -262,7 +336,8 @@ export default function CaseStudy({ project: p }: { project: Project }) {
             <span className="mt-8 font-display text-3xl font-bold leading-tight tracking-tight md:text-4xl">{q.title}</span>
           </a>
         ))}
-      </nav>
+      </nav>}
+      {!listed && <div className="pb-24" />}
     </article>
   );
 }

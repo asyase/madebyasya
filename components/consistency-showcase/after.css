@@ -1,0 +1,28 @@
+/* Layout for the After screens. Container queries, so the embedded app adapts
+   to the width it is given (side-by-side view, mobile) rather than the viewport. */
+.cc-layout { display: flex; flex-direction: column; min-height: inherit; }
+.cc-nav { flex: none; padding: 12px; background: var(--k-color-bg-surface); border-bottom: 1px solid var(--k-color-border-default); }
+.cc-nav ul { display: flex; flex-wrap: wrap; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.cc-brand { display: none; margin: 0 0 8px; padding: 0 8px; font-weight: 700; }
+.cc-main { flex: 1; min-width: 0; padding: 16px; }
+.cc-kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.cc-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 12px; row-gap: 2px; }
+.cc-row .cc-seats { display: none; }
+.cc-row .cc-date { order: 3; }
+.cc-2col { display: grid; gap: 16px; }
+.cc-toolbar { display: grid; gap: 12px; margin-bottom: 12px; }
+@container (min-width: 520px) { .cc-2col { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container (min-width: 560px) {
+  .cc-row { grid-template-columns: minmax(0, 1fr) 8rem 6rem auto; }
+  .cc-row .cc-seats { display: block; }
+  .cc-row .cc-date { order: 0; }
+}
+@container (min-width: 720px) {
+  .cc-layout { flex-direction: row; }
+  .cc-nav { width: 12rem; border-bottom: 0; border-right: 1px solid var(--k-color-border-default); }
+  .cc-nav ul { flex-direction: column; }
+  .cc-brand { display: block; }
+  .cc-main { padding: 24px; }
+  .cc-kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .cc-toolbar { grid-template-columns: minmax(0, 16rem) 1fr; align-items: end; }
+}
