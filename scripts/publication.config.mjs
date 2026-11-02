@@ -42,8 +42,8 @@ export const publication = {
    */
   webpOnly: ["work/from-prompt-to-product"],
 
-  /** Number of published project pages under /work/<slug>/ (29 existing + 3 case studies). */
-  expectedPublishedProjects: 32,
+  /** Number of published project pages under /work/<slug>/ (29 existing + 3 case studies + RET High Speakers). */
+  expectedPublishedProjects: 33,
 
   /** Written into out/ by preview builds; a production deploy must never contain it. */
   previewFlagFile: "PREVIEW-BUILD-NOT-FOR-DEPLOYMENT.txt",

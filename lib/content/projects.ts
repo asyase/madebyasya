@@ -94,6 +94,8 @@ export type Project = {
 const AI = "https://ai-portfolio-asya.vercel.app";
 const OLD = "https://asyase.github.io/about_me/assets/images/portfolio";
 const FIGMA = "https://www.figma.com/file/t38YDpRvHsOxxAQnTa3R1q/designs_anastasija";
+/** RET High Speakers demo on Vercel. If Vercel assigns a different address, change it here. */
+const RET_DEMO = "https://ret-high-speakers.vercel.app";
 
 export const projects: Project[] = [
   {
@@ -598,6 +600,64 @@ public String requireSafe(String sql) {
       { src: `${AI}/projects/home-cafe-pos-system/04-admin.png`, alt: "Admin view", caption: "Admin" },
     ],
     links: [{ label: "Full technical case study", href: `${AI}/projects/home-cafe-pos-system` }],
+  },
+  {
+    slug: "ret-high-speakers",
+    title: "RET High Speakers – Catalogue, Configurator & Admin",
+    kicker: "Commercial · Full-stack web application",
+    status: { label: "Client project · Live demo", tone: "shipped" },
+    categories: ["fullstack"],
+    role: "Full-stack developer – public site, configurator, admin panel, database and tests",
+    context: "For RET High Speakers, a loudspeaker maker. Replaces the company's earlier WordPress site.",
+    summary:
+      "A product site for a loudspeaker maker, rebuilt from WordPress as a Next.js application: a multilingual speaker catalogue with full specifications, a configurator, bookings and inquiries – all managed from its own admin panel on a relational database.",
+    stack: ["Next.js 16", "React 19", "TypeScript", "MariaDB / MySQL", "Admin panel", "Automated tests", "Vercel"],
+    accent: "lavender",
+    problem:
+      "The company's earlier site ran on WordPress. The new version needed structured product data – speakers, translations and specifications – a configurator, and a place for bookings and inquiries, all run by the company itself rather than through page editing.",
+    approach: [
+      "Model the catalogue as data: speakers, translations and specifications live in the database, and every page is built from it.",
+      "Give the owner an admin panel for products, translations, specifications, bookings and inquiries, behind its own login.",
+      "Use one typed codebase – Next.js 16, React 19 and TypeScript – for the public site, the configurator and the admin.",
+      "Cover the core logic with automated tests, so changes to the catalogue or forms do not silently break the site.",
+    ],
+    architecture: {
+      caption: "One Next.js application serves the public site and the admin; both read and write the same database.",
+      nodes: [
+        { id: "site", label: "Public site", kind: "ui", tech: "Next.js 16 · React 19", detail: "Catalogue pages and product pages with specifications, in several languages." },
+        { id: "cfg", label: "Configurator", kind: "ui", tech: "React · TypeScript", detail: "Visitors put together a speaker setup from the available options." },
+        { id: "server", label: "Server logic", kind: "api", tech: "Next.js server · TypeScript", detail: "Reads catalogue data, validates form input and stores bookings and inquiries." },
+        { id: "auth", label: "Admin login", kind: "guard", tech: "Session login", detail: "The admin panel is available only after login. In the public demo the login is given on request." },
+        { id: "db", label: "Database", kind: "storage", tech: "MariaDB · MySQL in the cloud for the demo", detail: "Speakers, translations, specifications, bookings, inquiries and the admin account." },
+        { id: "admin", label: "Admin panel", kind: "output", tech: "Next.js · React", detail: "The owner edits products, translations and specifications and handles incoming bookings and inquiries." },
+      ],
+    },
+    features: [
+      { label: "Speaker catalogue with product pages and full specifications", state: "done" },
+      { label: "Translations for catalogue content", state: "done" },
+      { label: "Speaker configurator", state: "done" },
+      { label: "Bookings and inquiries saved to the database", state: "done" },
+      { label: "Admin panel for products, translations, specifications, bookings and inquiries", state: "done" },
+      { label: "Admin login", state: "done" },
+      { label: "Automated tests", state: "done" },
+      { label: "Public demo on Vercel with a cloud copy of the database", state: "done" },
+    ],
+    challenges: [
+      { challenge: "Moving from WordPress pages to structured product data.", solution: "Speakers, translations and specifications live in database tables, and each page is generated from the same data the admin edits." },
+      { challenge: "The working database runs in MariaDB on a local machine, which Vercel cannot reach.", solution: "A copy script moves the local data one-to-one into a cloud MySQL database – speakers, translations, specifications, bookings, inquiries and the admin account – so the hosted demo shows the real setup." },
+      { challenge: "The demo has a real admin panel, which should not be open to everyone.", solution: "The admin stays behind its login; access to the demo admin is given on request." },
+      { challenge: "Some seed data uses placeholder product images.", solution: "They are labelled as placeholders in the demo and are not presented as product photography." },
+    ],
+    result: [
+      "A full-stack client application – public site, configurator and admin panel – in Next.js 16, React 19 and TypeScript, replacing the earlier WordPress site.",
+      "A public demo with the site and the admin panel (admin login on request).",
+    ],
+    shots: [],
+    links: [
+      { label: "Live demo – site", href: RET_DEMO },
+      { label: "Live demo – admin (login on request)", href: `${RET_DEMO}/admin/login` },
+    ],
+    demo: { label: "Open the live demo", href: RET_DEMO },
   },
   {
     slug: "laboulangerie",
@@ -1347,6 +1407,7 @@ const CARD_BADGES: Record<string, Status> = {
   "electricity-einvoicing": { label: "Commercial", tone: "shipped" },
   "laboulangerie": { label: "Commercial", tone: "shipped" },
   "pos-promo-site": { label: "Commercial", tone: "shipped" },
+  "ret-high-speakers": { label: "Commercial", tone: "shipped" },
   "liftertrans": { label: "AI chat prototype", tone: "proto" },
   "ai-ready-design-system": { label: "Interactive prototype", tone: "proto" },
   "from-chaos-to-consistency": { label: "Interactive prototype", tone: "proto" },
