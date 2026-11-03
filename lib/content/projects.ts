@@ -100,7 +100,7 @@ const RET_DEMO = "https://ret-high-speakers.vercel.app";
  * Set to true once the demo opens at RET_DEMO (site and /admin/login). While false, the case study
  * shows no demo button, no demo links and no mention of a public demo.
  */
-const RET_DEMO_LIVE = true;
+const RET_DEMO_LIVE = false;
 
 export const projects: Project[] = [
   {
