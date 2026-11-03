@@ -612,54 +612,66 @@ public String requireSafe(String sql) {
     kicker: "Commercial · Full-stack web application",
     status: { label: RET_DEMO_LIVE ? "Client project · Live demo" : "Client project", tone: "shipped" },
     categories: ["fullstack"],
-    role: "Full-stack developer – public site, configurator, admin panel, database and tests",
-    context: "For RET High Speakers, a loudspeaker maker. Replaces the company's earlier WordPress site.",
+    role: "Full-stack developer – public site, configurator, admin panel, data migration and tests",
+    context: "For RET High Speakers, an Estonian loudspeaker maker. Replaces the company's earlier WordPress site.",
     summary:
-      "A product site for a loudspeaker maker, rebuilt from WordPress as a Next.js application: a multilingual speaker catalogue with full specifications, a configurator, bookings and inquiries – all managed from its own admin panel on a relational database.",
-    stack: ["Next.js 16", "React 19", "TypeScript", "MariaDB / MySQL", "Admin panel", "Automated tests", ...(RET_DEMO_LIVE ? ["Vercel"] : [])],
+      "A product site and admin app for an Estonian loudspeaker maker, rebuilt from WordPress in Next.js 16, React 19 and TypeScript: a catalogue in English, Estonian and Russian, a speaker configurator that previews a model in the visitor's own room, and enquiries the team handles in its own admin panel.",
+    stack: ["Next.js 16", "React 19", "TypeScript", "next-intl", "Supabase", "Prisma", "MariaDB", "Better Auth", "Zod", "Playwright", "GitHub Actions", ...(RET_DEMO_LIVE ? ["Vercel"] : [])],
     accent: "lavender",
     problem:
-      "The company's earlier site ran on WordPress. The new version needed structured product data – speakers, translations and specifications – a configurator, and a place for bookings and inquiries, all run by the company itself rather than through page editing.",
+      "The company's earlier site ran on WordPress. The new one needed structured product data – models, specifications, drivers and finishes in three languages – a way to help visitors choose a speaker, and enquiries that reach the team with the context of what the visitor was looking at.",
     approach: [
-      "Model the catalogue as data: speakers, translations and specifications live in the database, and every page is built from it.",
-      "Give the owner an admin panel for products, translations, specifications, bookings and inquiries, behind its own login.",
-      "Use one typed codebase – Next.js 16, React 19 and TypeScript – for the public site, the configurator and the admin.",
-      "Cover the core logic with automated tests, so changes to the catalogue or forms do not silently break the site.",
+      "Model the catalogue as data: every model's texts, specifications, drivers and finishes exist per language (EN, ET, RU), and all pages are generated from it.",
+      "Turn choosing a speaker into four short questions – room size, use, speaker type and placement – matched against each model's published specifications by a pure, unit-tested scoring module.",
+      "Carry the configurator answers, the chosen model and its score into the enquiry, so the team sees why the visitor asked.",
+      "Keep the admin separate from the localized site: an English-only internal tool behind its own login, with every server action re-checking the session.",
+      "Treat quality as part of the build: TypeScript, ESLint, unit tests and a production build run in GitHub Actions on every push.",
     ],
     architecture: {
-      caption: "One Next.js application serves the public site and the admin; both read and write the same database.",
+      caption: "One Next.js application serves the localized site and the admin. Production runs on Supabase; the staging stack is being moved to Prisma, MariaDB and Better Auth on Zone.ee.",
       nodes: [
-        { id: "site", label: "Public site", kind: "ui", tech: "Next.js 16 · React 19", detail: "Catalogue pages and product pages with specifications, in several languages." },
-        { id: "cfg", label: "Configurator", kind: "ui", tech: "React · TypeScript", detail: "Visitors put together a speaker setup from the available options." },
-        { id: "server", label: "Server logic", kind: "api", tech: "Next.js server · TypeScript", detail: "Reads catalogue data, validates form input and stores bookings and inquiries." },
-        { id: "auth", label: "Admin login", kind: "guard", tech: "Session login", detail: RET_DEMO_LIVE ? "The admin panel is available only after login. In the public demo the login is given on request." : "The admin panel is available only after login." },
-        { id: "db", label: "Database", kind: "storage", tech: RET_DEMO_LIVE ? "MariaDB · MySQL in the cloud for the demo" : "MariaDB", detail: "Speakers, translations, specifications, bookings, inquiries and the admin account." },
-        { id: "admin", label: "Admin panel", kind: "output", tech: "Next.js · React", detail: "The owner edits products, translations and specifications and handles incoming bookings and inquiries." },
+        { id: "site", label: "Localized site", kind: "ui", tech: "Next.js 16 · React 19 · next-intl", detail: "Catalogue and product pages in English, Estonian and Russian, with specifications, drivers and finishes per language." },
+        { id: "cfg", label: "Configurator", kind: "ui", tech: "React · TypeScript", detail: "Four questions, results ranked by a pure scoring module, a comparison table and a room visualizer that places the speaker on the visitor's own room photo – kept in the browser, never uploaded." },
+        { id: "api", label: "Enquiry API", kind: "api", tech: "Route handler · Zod", detail: "Validates the form, stores the enquiry with the configurator context and sends a notification and a confirmation e-mail. A failed e-mail never loses a saved enquiry." },
+        { id: "auth", label: "Admin access", kind: "guard", tech: "Supabase Auth / Better Auth", detail: "The admin requires login; server actions check the session and admin role themselves, not only the page middleware." },
+        { id: "db", label: "Data", kind: "storage", tech: "Supabase Postgres · Prisma + MariaDB on staging", detail: "Products with per-language specifications, enquiries and admin users. Image uploads are checked by their real file content, not the reported type." },
+        { id: "admin", label: "Admin panel", kind: "output", tech: "Next.js · React", detail: "Dashboard, product editing in three languages with photos, and enquiries with status tracking." },
       ],
     },
     features: [
-      { label: "Speaker catalogue with product pages and full specifications", state: "done" },
-      { label: "Translations for catalogue content", state: "done" },
-      { label: "Speaker configurator", state: "done" },
-      { label: "Bookings and inquiries saved to the database", state: "done" },
-      { label: "Admin panel for products, translations, specifications, bookings and inquiries", state: "done" },
-      { label: "Admin login", state: "done" },
-      { label: "Automated tests", state: "done" },
-      ...(RET_DEMO_LIVE ? [{ label: "Public demo on Vercel with a cloud copy of the database", state: "done" as const }] : []),
+      { label: "Catalogue and product pages in English, Estonian and Russian", state: "done" },
+      { label: "Speaker configurator: four questions, ranked results and a comparison table", state: "done" },
+      { label: "Room visualizer – the speaker on the visitor's own room photo, without uploading it", state: "done" },
+      { label: "Enquiries with configurator context, e-mail notification and confirmation", state: "done" },
+      { label: "Admin panel: dashboard, products in three languages with photos, enquiry status", state: "done" },
+      { label: "Security headers (CSP, HSTS) and server-side checks on every admin action", state: "done" },
+      { label: "Unit tests (node:test), a Playwright configurator-to-enquiry test and CI on GitHub Actions", state: "done" },
+      { label: "Staging migration from Supabase to Prisma, MariaDB and Better Auth on Zone.ee", state: "done" },
+      { label: "Demo booking – listening sessions booked online and managed in the admin", state: "proto" },
     ],
     challenges: [
-      { challenge: "Moving from WordPress pages to structured product data.", solution: "Speakers, translations and specifications live in database tables, and each page is generated from the same data the admin edits." },
+      { challenge: "Moving from WordPress pages to structured, multilingual product data.", solution: "Each model's texts, specifications, drivers and finishes are stored per language, and every page and the configurator read the same data the admin edits." },
+      { challenge: "Recommending a speaker without guessing.", solution: "The answers are matched against each model's published specifications in a pure scoring module with its own unit tests, and the result travels into the enquiry." },
+      { challenge: "Previewing a speaker in the visitor's room without collecting private photos.", solution: "The room photo stays in the browser as a local blob URL and is never sent to the server or the image optimizer." },
+      { challenge: "Moving staging off Supabase while production keeps running on it.", solution: "Environment switches select Supabase or Prisma/MariaDB with Better Auth per environment; migration and verification scripts copy and check the data, and the old tables stay as a rollback copy." },
       ...(RET_DEMO_LIVE ? [
-      { challenge: "The working database runs in MariaDB on a local machine, which Vercel cannot reach.", solution: "A copy script moves the local data one-to-one into a cloud MySQL database – speakers, translations, specifications, bookings, inquiries and the admin account – so the hosted demo shows the real setup." },
-      { challenge: "The demo has a real admin panel, which should not be open to everyone.", solution: "The admin stays behind its login; access to the demo admin is given on request." },
-      { challenge: "Some seed data uses placeholder product images.", solution: "They are labelled as placeholders in the demo and are not presented as product photography." },
+      { challenge: "A public demo with a working admin and database on Vercel.", solution: "A setup step runs on every deploy: it creates the tables, imports the catalogue and creates the demo admin only where they are missing, so redeploys never overwrite data." },
       ] : []),
     ],
     result: [
-      "A full-stack client application – public site, configurator and admin panel – in Next.js 16, React 19 and TypeScript, replacing the earlier WordPress site.",
-      ...(RET_DEMO_LIVE ? ["A public demo with the site and the admin panel (admin login on request)."] : []),
+      "A full-stack client application – localized site, configurator and admin panel – in Next.js 16, React 19 and TypeScript, replacing the earlier WordPress site.",
+      "Staging moved to a Zone.ee-native stack (Prisma, MariaDB, Better Auth) with documented deployment and disaster recovery.",
+      ...(RET_DEMO_LIVE ? ["A public demo with the site and the admin panel (admin login on request). Product images in the demo are generated demo images, not product photography."] : []),
     ],
-    shots: [],
+    shots: [
+      { src: "/work/ret-high-speakers/catalogue.webp", alt: "RET catalogue with five Maestro loudspeakers on black backgrounds", caption: "Catalogue (live demo, generated demo images)" },
+      { src: "/work/ret-high-speakers/home.webp", alt: "RET home page with a hero photo of two floorstanding speakers", caption: "Home page" },
+      { src: "/work/ret-high-speakers/product.webp", alt: "Product page for the RET 146 with gallery and specifications", caption: "Product page – RET 146" },
+      { src: "/work/ret-high-speakers/configurator.webp", alt: "Speaker configurator asking about the size of the listening space", caption: "Configurator – step 1 of 4" },
+      { src: "/work/ret-high-speakers/admin-dashboard.webp", alt: "Admin dashboard with counts of live products, enquiries and drafts", caption: "Admin – dashboard" },
+      { src: "/work/ret-high-speakers/admin-products.webp", alt: "Admin product list with model, type, slug and status", caption: "Admin – products" },
+      { src: "/work/ret-high-speakers/admin-edit.webp", alt: "Admin form for editing the RET 146 with texts and specifications", caption: "Admin – editing a product" },
+    ],
     links: RET_DEMO_LIVE
       ? [
           { label: "Live demo – site", href: RET_DEMO },
@@ -1402,7 +1414,7 @@ public String requireSafe(String sql) {
 
 // Card covers are self-hosted copies of the top of each project's first screenshot,
 // so the gallery doesn't depend on other sites being reachable.
-const LOCAL_COVERS = ["accounting-modernization", "electricity-einvoicing", "ecommerce-backend", "ferry-booking", "ai-meal-planner", "ai-website-builder", "liftertrans", "content-factory", "telia-ux-audit", "modular-furniture-store", "home-cafe-pos", "stiilihub", "telegram-life-assistant", "n8n-automations", "laboulangerie", "ai-creative-design", "pos-promo-site", "telia-tv-discovery", "dailytrack", "pomodoro", "fitness-coaching", "birthday-reminder", "flashcards", "abacus-kids", "transfer-company", "vet-clinic", "book-eshop", "jewellery-site", "bicycle-store-design", "ai-ready-design-system", "from-chaos-to-consistency", "from-prompt-to-product"];
+const LOCAL_COVERS = ["accounting-modernization", "electricity-einvoicing", "ecommerce-backend", "ferry-booking", "ai-meal-planner", "ai-website-builder", "liftertrans", "content-factory", "telia-ux-audit", "modular-furniture-store", "home-cafe-pos", "stiilihub", "telegram-life-assistant", "n8n-automations", "laboulangerie", "ai-creative-design", "pos-promo-site", "telia-tv-discovery", "dailytrack", "pomodoro", "fitness-coaching", "birthday-reminder", "flashcards", "abacus-kids", "transfer-company", "vet-clinic", "book-eshop", "jewellery-site", "bicycle-store-design", "ai-ready-design-system", "from-chaos-to-consistency", "from-prompt-to-product", "ret-high-speakers"];
 for (const p of projects) if (LOCAL_COVERS.includes(p.slug)) p.cover = `/work/${p.slug}/cover.webp`;
 
 // Gallery cards show a badge only where it changes how the work should be read:
