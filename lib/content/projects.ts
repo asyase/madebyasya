@@ -95,12 +95,12 @@ const AI = "https://ai-portfolio-asya.vercel.app";
 const OLD = "https://asyase.github.io/about_me/assets/images/portfolio";
 const FIGMA = "https://www.figma.com/file/t38YDpRvHsOxxAQnTa3R1q/designs_anastasija";
 /** RET High Speakers demo on Vercel. If Vercel assigns a different address, change it here. */
-const RET_DEMO = "https://ret-high-speakers-ku5e.vercel.app";
+const RET_DEMO = "https://ret-high-speakers.vercel.app";
 /**
  * Set to true once the demo opens at RET_DEMO (site and /admin/login). While false, the case study
  * shows no demo button, no demo links and no mention of a public demo.
  */
-const RET_DEMO_LIVE = false;
+const RET_DEMO_LIVE = true;
 
 export const projects: Project[] = [
   {
