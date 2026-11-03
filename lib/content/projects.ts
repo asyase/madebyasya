@@ -617,6 +617,7 @@ public String requireSafe(String sql) {
     summary:
       "A product site and admin app for an Estonian loudspeaker maker, rebuilt from WordPress in Next.js 16, React 19 and TypeScript: a catalogue in English, Estonian and Russian, a speaker configurator that previews a model in the visitor's own room, and enquiries the team handles in its own admin panel.",
     stack: ["Next.js 16", "React 19", "TypeScript", "next-intl", "Supabase", "Prisma", "MariaDB", "Better Auth", "Zod", "Playwright", "GitHub Actions", ...(RET_DEMO_LIVE ? ["Vercel"] : [])],
+    featured: true,
     accent: "lavender",
     problem:
       "The company's earlier site ran on WordPress. The new one needed structured product data – models, specifications, drivers and finishes in three languages – a way to help visitors choose a speaker, and enquiries that reach the team with the context of what the visitor was looking at.",
@@ -1452,7 +1453,7 @@ const bySlug = (slugs: string[]) => slugs.map((s) => projects.find((p) => p.slug
 export const designSystemProjects = bySlug(["ai-ready-design-system", "from-chaos-to-consistency", "from-prompt-to-product"]);
 
 // Home page "Selected work": shown first, in this order; the rest follow in index order.
-export const homeSelection = bySlug(["ai-ready-design-system", "from-chaos-to-consistency", "from-prompt-to-product", "ai-meal-planner", "ai-website-builder", "telia-ux-audit"]);
+export const homeSelection = bySlug(["ai-ready-design-system", "from-chaos-to-consistency", "from-prompt-to-product", "ret-high-speakers", "ai-meal-planner", "ai-website-builder", "telia-ux-audit"]);
 
 export const toneLabel: Record<StatusTone, string> = {
   done: "Completed",
