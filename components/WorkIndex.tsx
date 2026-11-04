@@ -5,7 +5,7 @@ import { ArrowUpRight } from "lucide-react";
 import FilterBar, { type Filter } from "./FilterBar";
 import ProjectCard from "./ProjectCard";
 import FeaturedDesignSystems from "./FeaturedDesignSystems";
-import { categories, projects, type Category } from "@/lib/content/projects";
+import { byDiscipline, categories, projects, type Category } from "@/lib/content/projects";
 
 const valid = categories.map((c) => c.hash);
 
@@ -33,7 +33,7 @@ export default function WorkIndex() {
     try { history.replaceState(null, "", f === "all" ? window.location.pathname : `#${f}`); } catch { /* sandboxed frames */ }
   }
 
-  const list = useMemo(() => projects.filter((p) => filter === "all" || p.categories.includes(filter as Category)), [filter]);
+  const list = useMemo(() => byDiscipline(projects, filter as Category | "all"), [filter]);
 
   return (
     <>

@@ -4,11 +4,15 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import FilterBar, { type Filter } from "./FilterBar";
 import ProjectCard from "./ProjectCard";
-import { homeSelection, projects } from "@/lib/content/projects";
+import { byDiscipline, homeSelectionByFilter, projects } from "@/lib/content/projects";
 import { useHref } from "@/lib/paths";
 
-// Home selection first, then the rest, so every filter still shows a full layout.
-const ordered = [...homeSelection, ...projects.filter((p) => !homeSelection.includes(p))];
+// Each filter's lead projects first, then the rest of that discipline, so every filter shows
+// its own work and still fills the full layout.
+const forFilter = (f: Filter) => {
+  const lead = homeSelectionByFilter[f].filter((p) => f === "all" || p.categories.includes(f));
+  return [...lead, ...byDiscipline(projects, f).filter((p) => !lead.includes(p))];
+};
 const LIMIT = 6;
 
 // Layout rhythm: wide, then a tall/standard pair, repeated.
@@ -18,7 +22,7 @@ const spans = ["lg:col-span-12", "lg:col-span-5", "lg:col-span-7 lg:pt-32", "lg:
 export default function SelectedWork() {
   const href = useHref();
   const [filter, setFilter] = useState<Filter>("all");
-  const list = useMemo(() => ordered.filter((p) => filter === "all" || p.categories.includes(filter)).slice(0, LIMIT), [filter]);
+  const list = useMemo(() => forFilter(filter).slice(0, LIMIT), [filter]);
   const total = filter === "all" ? projects.length : projects.filter((p) => p.categories.includes(filter)).length;
 
   return (

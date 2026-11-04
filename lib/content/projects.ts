@@ -1455,6 +1455,23 @@ export const designSystemProjects = bySlug(["ai-ready-design-system", "from-chao
 // Home page "Selected work": shown first, in this order; the rest follow in index order.
 export const homeSelection = bySlug(["ai-ready-design-system", "from-chaos-to-consistency", "from-prompt-to-product", "ret-high-speakers", "ai-meal-planner", "ai-website-builder", "telia-ux-audit"]);
 
+// Home page lead projects per filter. Most projects belong to several disciplines, so without
+// this every filter would open with the same design system cards. Each filter leads with work
+// whose main discipline it is; the remaining matches follow.
+export const homeSelectionByFilter: Record<Category | "all", Project[]> = {
+  all: homeSelection,
+  fullstack: bySlug(["ret-high-speakers", "modular-furniture-store", "liftertrans", "home-cafe-pos", "accounting-modernization", "electricity-einvoicing"]),
+  design: bySlug(["telia-ux-audit", "ai-ready-design-system", "from-chaos-to-consistency", "from-prompt-to-product", "telia-tv-discovery", "dailytrack"]),
+  ai: bySlug(["ai-meal-planner", "ai-website-builder", "content-factory", "from-prompt-to-product", "telegram-life-assistant", "n8n-automations"]),
+};
+
+/** Projects in a discipline, those whose main (first) discipline it is first, each group in index order. */
+export function byDiscipline(list: Project[], filter: Category | "all"): Project[] {
+  if (filter === "all") return list;
+  const matches = list.filter((p) => p.categories.includes(filter));
+  return [...matches.filter((p) => p.categories[0] === filter), ...matches.filter((p) => p.categories[0] !== filter)];
+}
+
 export const toneLabel: Record<StatusTone, string> = {
   done: "Completed",
   shipped: "Shipped",
