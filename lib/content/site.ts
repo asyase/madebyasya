@@ -13,7 +13,7 @@ export const site = {
   linkedin: "https://www.linkedin.com/in/anastasija-selevjorstova-748779172",
   aiPortfolio: "https://ai-portfolio-asya.vercel.app",
   cv: "/cv/Anastasija-Selevjorstova-CV.pdf",
-  url: "https://madebyasya.vercel.app",
+  url: "https://madeby-asya.vercel.app",
   description:
     "Anastasija Selevjorstova – full-stack developer with a designer's eye, based in Tallinn. Java and Spring Boot, React and Next.js, UX research, and practical AI engineering.",
   languages: [
