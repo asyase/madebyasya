@@ -1539,7 +1539,7 @@ export const homeSelectionByFilter: Record<Category | "all", Project[]> = {
   all: homeSelection,
   fullstack: bySlug(["ret-high-speakers", "modular-furniture-store", "liftertrans", "home-cafe-pos", "accounting-modernization", "electricity-einvoicing"]),
   design: bySlug(["telia-ux-audit", "ai-ready-design-system", "from-chaos-to-consistency", "from-prompt-to-product", "telia-tv-discovery", "dailytrack"]),
-  ai: bySlug(["ai-meal-planner", "ai-website-builder", "content-factory", "from-prompt-to-product", "telegram-life-assistant", "n8n-automations"]),
+  ai: bySlug(["ai-meal-planner", "developer-knowledge-assistant", "ai-website-builder", "content-factory", "from-prompt-to-product", "telegram-life-assistant", "n8n-automations"]),
 };
 
 /** Projects in a discipline, those whose main (first) discipline it is first, each group in index order. */
