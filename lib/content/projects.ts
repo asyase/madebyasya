@@ -947,6 +947,79 @@ public String requireSafe(String sql) {
     links: [{ label: "Figma file", href: `${FIGMA}?type=design&node-id=0%3A1&mode=design` }],
   },
   {
+    slug: "trycruisenow-automation",
+    title: "TryCruiseNow – Social Publishing Automation",
+    kicker: "Workflow automation · Instagram & Telegram APIs · AI content",
+    year: "2026",
+    status: { label: "Working · first posts published", tone: "done" },
+    categories: ["ai"],
+    role: "Solo – workflow design, Meta and Telegram API integration, AI content step, error handling and testing",
+    context: "TryCruiseNow, a cruise and travel community in Tallinn that runs travel quizzes",
+    summary:
+      "Three n8n workflows on a self-hosted server that publish TryCruiseNow content: one run posts to Instagram through the Graph API and mirrors the post to Telegram, and a scheduled AI workflow writes a new on-brand Telegram post every day with Google Gemini.",
+    stack: ["n8n (self-hosted)", "Instagram Graph API", "Telegram Bot API", "Google Gemini", "n8n AI nodes (LangChain)", "JavaScript", "REST APIs", "Meta for Developers"],
+    accent: "pink",
+    problem:
+      "Posting by hand to Instagram and Telegram meant doing the same work twice: preparing the media, rewriting the caption for each channel and checking that the post actually went out. Coming up with a fresh post idea every day took time too.",
+    approach: [
+      "One configuration step per post (type, media, caption), so the same workflow handles every format.",
+      "Publish through the official APIs only: Instagram Graph API and the Telegram Bot API.",
+      "Every run reports back: a success message or an error message with the API response goes to a private Telegram chat.",
+      "Keep AI on the writing only: the model drafts the text, the workflow handles topics, formatting and delivery.",
+    ],
+    architecture: {
+      caption: "From one configuration step to a post on Instagram, a copy in Telegram and a status message.",
+      nodes: [
+        { id: "cfg", label: "Post config", kind: "input", tech: "n8n Set · manual or scheduled trigger", detail: "Type (post, reel, story, carousel or text), media URLs and caption in one place." },
+        { id: "route", label: "Route by type", kind: "process", tech: "n8n Switch · Code", detail: "Each format has its own branch. A carousel is split into items, each item becomes a child container, and the IDs are joined for the parent container." },
+        { id: "ig", label: "Instagram containers", kind: "api", tech: "Instagram Graph API", detail: "The media container is created first; the workflow waits and checks its status until Instagram reports FINISHED, then publishes." },
+        { id: "ai", label: "AI writer", kind: "ai", tech: "Google Gemini · n8n LLM chain", detail: "Writes a post on a randomly picked topic in the brand voice, with Telegram HTML formatting and hashtags. Language is a config field." },
+        { id: "clean", label: "Clean output", kind: "guard", tech: "JavaScript Code node", detail: "Removes code fences and turns stray Markdown into Telegram HTML, so the formatting never breaks the message." },
+        { id: "tg", label: "Telegram & alerts", kind: "output", tech: "Telegram Bot API", detail: "Mirrors the Instagram post to Telegram and sends ✅ or ❌ status messages with the API response." },
+      ],
+    },
+    features: [
+      { label: "Instagram photo post via the Graph API (published)", state: "done" },
+      { label: "Instagram Reels, Stories and carousels (2–10 images)", state: "proto" },
+      { label: "Automatic copy of every Instagram post to Telegram", state: "proto" },
+      { label: "Telegram text posts with HTML formatting", state: "done" },
+      { label: "Telegram photo and video posts", state: "proto" },
+      { label: "AI-written posts with Gemini, topic picked at random, language set in config", state: "done" },
+      { label: "Daily schedule for the AI workflow (10:00)", state: "proto" },
+      { label: "Success and error messages to a private Telegram chat", state: "done" },
+    ],
+    challenges: [
+      { challenge: "Instagram does not publish media straight away: it first processes it in a container.", solution: "Create the container, wait, check status_code and publish only when it is FINISHED; otherwise send an error message with the response." },
+      { challenge: "The access token was rejected as unparseable, and later a working token expired after an hour.", solution: "Matched the endpoint to the token type (Facebook login tokens go to graph.facebook.com, Instagram login tokens to graph.instagram.com) and moved to a long-lived token instead of a short-lived Explorer token." },
+      { challenge: "The AI step hung for minutes without an error.", solution: "The chosen Gemini model had no free quota and the node kept retrying silently. Switching to Gemini 3.1 Flash Lite brought a full run down to under 10 seconds." },
+      { challenge: "The bot replied \"chat not found\".", solution: "A Telegram bot can only message a user who has started it first, so the setup includes pressing Start in the bot before the first run." },
+      { challenge: "Model output sometimes mixes Markdown into the post.", solution: "A Code node cleans the text and converts **bold** to Telegram HTML before sending." },
+      { challenge: "Photos from a phone folder were 3:4 and 9:16.", solution: "Instagram's API accepts feed images between 4:5 and 1.91:1, so the workflow documents the format requirement and images are cropped to 4:5 before publishing." },
+    ],
+    numbers: [
+      { value: "3", label: "workflows: Instagram, Telegram, AI daily post" },
+      { value: "5", label: "content types: post, reel, story, carousel, text" },
+      { value: "<10 s", label: "AI post from topic to Telegram" },
+      { value: "1", label: "run publishes to both channels" },
+    ],
+    result: [
+      "The first Instagram post was published through the API, with a confirmation in Telegram. AI-written posts in English and Russian were generated and delivered to Telegram.",
+      "Reels, Stories, carousels and the Telegram copy are built and wired into the same flow; they are being tested with real content next.",
+    ],
+    lessons: [
+      "Most of the work in an API integration is access: app setup, permissions and token types, not the workflow itself.",
+      "Silent retries hide real errors. Status messages with the raw API response made every problem quick to diagnose.",
+    ],
+    shots: [
+      { src: "/work/trycruisenow-automation/01-ai-daily-post.webp", alt: "n8n workflow: daily schedule, config, topic picker, Gemini AI writer, text cleanup, Telegram post and status alerts", caption: "AI daily Telegram post" },
+      { src: "/work/trycruisenow-automation/02-instagram-publisher.webp", alt: "n8n workflow publishing posts, reels, stories and carousels to Instagram and mirroring them to Telegram", caption: "Instagram publisher, full workflow" },
+      { src: "/work/trycruisenow-automation/03-instagram-publish-and-mirror.webp", alt: "Detail of the Instagram workflow: container status check, publishing, alerts and the Telegram copy", caption: "Status check, publish and Telegram copy" },
+      { src: "/work/trycruisenow-automation/04-telegram-publisher.webp", alt: "n8n workflow sending photo, video or text posts to Telegram with success and error alerts", caption: "Telegram publisher" },
+    ],
+    cover: "/work/trycruisenow-automation/cover.webp",
+    links: [],
+  },
+  {
     slug: "ecommerce-backend",
     title: "Full-Stack E-Commerce Application",
     kicker: "Backend architecture",
@@ -1539,7 +1612,7 @@ export const homeSelectionByFilter: Record<Category | "all", Project[]> = {
   all: homeSelection,
   fullstack: bySlug(["ret-high-speakers", "modular-furniture-store", "liftertrans", "home-cafe-pos", "accounting-modernization", "electricity-einvoicing"]),
   design: bySlug(["telia-ux-audit", "ai-ready-design-system", "from-chaos-to-consistency", "from-prompt-to-product", "telia-tv-discovery", "dailytrack"]),
-  ai: bySlug(["ai-meal-planner", "developer-knowledge-assistant", "ai-website-builder", "content-factory", "from-prompt-to-product", "telegram-life-assistant", "n8n-automations"]),
+  ai: bySlug(["ai-meal-planner", "developer-knowledge-assistant", "ai-website-builder", "content-factory", "from-prompt-to-product", "telegram-life-assistant", "trycruisenow-automation", "n8n-automations"]),
 };
 
 /** Projects in a discipline, those whose main (first) discipline it is first, each group in index order. */
